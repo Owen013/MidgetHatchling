@@ -26,6 +26,9 @@ namespace SmolHatchling
         public static float runSpeed, walkSpeed, acceleration, jumpPower, animSpeed;
         public bool pitchChangeEnabled, storyEnabled, storyEnabledNow;
 
+        // Menu vars
+        OptionsSelectorElement menuButton_radius;
+
         // Mod vars
         public static SmolHatchling Instance;
         public static Vector3 playerScale;
@@ -73,6 +76,8 @@ namespace SmolHatchling
 
             LoadManager.OnStartSceneLoad += (scene, loadScene) =>
             {
+                // storyEnabled is set at the beginning of the loop and doesn't change, because DialogueTrees
+                // should only be changed right at the beginning.
                 switch (storyEnabled)
                 {
                     case true:
