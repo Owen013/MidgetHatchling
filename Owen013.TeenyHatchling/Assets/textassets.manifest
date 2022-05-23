@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 2703460480
+CRC: 1074964986
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 4e444119821fb953181476dd4f7479a4
+    Hash: 8eeaeef2e6c22c66a53a498d92e35369
   TypeTreeHash:
     serializedVersion: 2
     Hash: 5ad585dd02dfb5016c0dad519eab8f49
@@ -13,19 +13,18 @@ ClassTypes:
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers: []
 Assets:
-- Assets/AssetBundles/Tektite_ImpactCrater.txt
-- Assets/AssetBundles/Gabbro_1.txt
-- Assets/AssetBundles/Riebeck.txt
-- Assets/AssetBundles/Gabbro_3T.txt
-- Assets/AssetBundles/Galena.txt
-- Assets/AssetBundles/Gabbro_2F.txt
-- Assets/AssetBundles/Gabbro_3F.txt
-- Assets/AssetBundles/Esker.txt
-- Assets/AssetBundles/Hornfels.txt
-- Assets/AssetBundles/Slate.txt
-- Assets/AssetBundles/Gabbro_merge.txt
-- Assets/AssetBundles/Mica.txt
-- Assets/AssetBundles/Tephra.txt
-- Assets/AssetBundles/Tuff.txt
-- Assets/AssetBundles/Gabbro_2T.txt
+- Assets/XMLs/Tektite_ImpactCrater.txt
+- Assets/XMLs/Gabbro_1.txt
+- Assets/XMLs/Gabbro_3T.txt
+- Assets/XMLs/Galena.txt
+- Assets/XMLs/Gabbro_2F.txt
+- Assets/XMLs/Gabbro_3F.txt
+- Assets/XMLs/Esker.txt
+- Assets/XMLs/Hornfels.txt
+- Assets/XMLs/Slate.txt
+- Assets/XMLs/Gabbro_merge.txt
+- Assets/XMLs/Mica.txt
+- Assets/XMLs/Tephra.txt
+- Assets/XMLs/Tuff.txt
+- Assets/XMLs/Gabbro_2T.txt
 Dependencies: []
