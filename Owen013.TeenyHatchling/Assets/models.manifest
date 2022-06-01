@@ -1,0 +1,27 @@
+ManifestFileVersion: 0
+CRC: 2098053804
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 6ab7296bf93bcce1529afcdbd18c186f
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: df304670b7789138ad83cda902cb7878
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 65
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Models/SH_Stool.prefab
+Dependencies: []

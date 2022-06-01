@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 1074964986
+CRC: 4045251861
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 8eeaeef2e6c22c66a53a498d92e35369
+    Hash: 96911ad84070d8e0b1ffc18656eb3a6a
   TypeTreeHash:
     serializedVersion: 2
     Hash: 5ad585dd02dfb5016c0dad519eab8f49
@@ -22,6 +22,7 @@ Assets:
 - Assets/XMLs/Esker.txt
 - Assets/XMLs/Hornfels.txt
 - Assets/XMLs/Slate.txt
+- Assets/XMLs/SH_LaunchCodesNote.txt
 - Assets/XMLs/Gabbro_merge.txt
 - Assets/XMLs/Mica.txt
 - Assets/XMLs/Tephra.txt
