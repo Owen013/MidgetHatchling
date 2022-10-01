@@ -1,8 +1,6 @@
 ﻿using OWML.Common;
 using OWML.ModHelper;
 using System.Collections.Generic;
-using System.Linq;
-using System.Xml;
 using UnityEngine;
 
 namespace SmolHatchling
@@ -11,7 +9,7 @@ namespace SmolHatchling
     {
         // Config vars
         public float height, radius, animSpeed;
-        public bool autoRadius, pitchChangeEnabled, storyEnabled, storyEnabledNow, hikersModEnabled;
+        public bool autoRadius, pitchChangeEnabled, storyEnabled, stoolsEnabled, storyEnabledNow, hikersModEnabled;
 
         // Mod vars
         public static SmolHatchling Instance;
@@ -26,97 +24,52 @@ namespace SmolHatchling
         private ShipLogController logController;
         private PlayerCloneController cloneController;
         private EyeMirrorController mirrorController;
-        private AssetBundle textAssets, models;
         private List<OWAudioSource> playerAudio;
-        private List<GameObject> stools;
-        private GameObject emberTwin, ashTwin, timberHearth, attlerock, brittleHollow, hollowsLantern, giantsDeep, darkBramble,
-                   quantumMoon, stranger, dreamWorld;
-        private Material hearthTexture, nomaiTexture, quantumTexture, strangerTexture, dreamTexture, simTexture;
-
-        private bool WrongScene()
-        {
-            OWScene scene = LoadManager.s_currentScene;
-            return !(scene == OWScene.SolarSystem || scene == OWScene.EyeOfTheUniverse);
-        }
-
-        // NewStool()
-
-        // NewStoolSocket()
 
         public override object GetApi()
         {
             return new SmolHatchlingAPI();
         }
 
-        private void Awake()
+        public override void Configure(IModConfig config)
+        {
+            base.Configure(config);
+            autoRadius = config.GetSettingsValue<bool>("Auto-Radius");
+            height = config.GetSettingsValue<float>("Height (Default 1)");
+            radius = config.GetSettingsValue<float>("Radius (Default 1)");
+            pitchChangeEnabled = config.GetSettingsValue<bool>("Change Pitch Depending on Height");
+            //stoolsEnabled = config.GetSettingsValue<bool>("Enable Stools (Requires Reload!)");
+            //storyEnabled = config.GetSettingsValue<bool>("Enable Story (Requires Reload!)");
+            Setup();
+        }
+
+        public void Awake()
         {
             Instance = this;
         }
 
-        private void Start()
+        public void Start()
         {
-            // Load assets
-            //textAssets = ModHelper.Assets.LoadBundle("Assets/textassets");
-            //models = ModHelper.Assets.LoadBundle("Assets/models");
-
-            // Add patches
-            ModHelper.HarmonyHelper.AddPostfix<PlayerCharacterController>("Start", typeof(Patches), nameof(Patches.CharacterStart));
-            ModHelper.HarmonyHelper.AddPostfix<GhostGrabController>("OnStartLiftPlayer", typeof(Patches), nameof(Patches.GhostLiftedPlayer));
-            ModHelper.HarmonyHelper.AddPostfix<PlayerScreamingController>("Awake", typeof(Patches), nameof(Patches.NPCPlayerAwake));
-            ModHelper.HarmonyHelper.AddPostfix<PlayerCloneController>("Start", typeof(Patches), nameof(Patches.EyeCloneStart));
-            ModHelper.HarmonyHelper.AddPostfix<EyeMirrorController>("Start", typeof(Patches), nameof(Patches.EyeMirrorStart));
-            ModHelper.HarmonyHelper.AddPostfix<ChertDialogueSwapper>("SelectMood", typeof(Patches), nameof(Patches.ChertDialogueSwapped));
-            /*
-            ModHelper.HarmonyHelper.AddPrefix<PlayerCharacterController>(
-                "IsValidGroundedHit", typeof(Patches), nameof(Patches.IsValidGroundedHit));
-             */
-
-            LoadManager.OnStartSceneLoad += (scene, loadScene) =>
-            {
-                stools = new List<GameObject>();
-
-                // storyEnabled is set at the beginning of the loop and doesn't change, because DialogueTrees
-                // should only be changed right at the beginning.
-                switch (storyEnabled)
-                {
-                    case true:
-                        storyEnabledNow = true;
-                        break;
-                    case false:
-                        storyEnabledNow = false;
-                        break;
-                }
-            };
-
-            LoadManager.OnCompleteSceneLoad += (scene, loadScene) =>
-            {
-                //if (storyEnabledNow) ModHelper.Events.Unity.FireInNUpdates(() => SetupStory(), 60);
-            };
-
-            ModHelper.Console.WriteLine($"{nameof(SmolHatchling)} is ready to go!", MessageType.Success);
+            ModHelper.HarmonyHelper.AddPostfix<PlayerCharacterController>("Start", typeof(SmolHatchlingPatches), nameof(SmolHatchlingPatches.CharacterStart));
+            ModHelper.HarmonyHelper.AddPostfix<GhostGrabController>("OnStartLiftPlayer", typeof(SmolHatchlingPatches), nameof(SmolHatchlingPatches.GhostLiftedPlayer));
+            ModHelper.HarmonyHelper.AddPostfix<PlayerScreamingController>("Awake", typeof(SmolHatchlingPatches), nameof(SmolHatchlingPatches.NPCPlayerAwake));
+            ModHelper.HarmonyHelper.AddPostfix<PlayerCloneController>("Start", typeof(SmolHatchlingPatches), nameof(SmolHatchlingPatches.EyeCloneStart));
+            ModHelper.HarmonyHelper.AddPostfix<EyeMirrorController>("Start", typeof(SmolHatchlingPatches), nameof(SmolHatchlingPatches.EyeMirrorStart));
+            //gameObject.AddComponent<StoolController>();
+            //gameObject.AddComponent<StoryController>();
+            ModHelper.Console.WriteLine($"Smol Hatchling is ready to go!", MessageType.Success);
         }
 
-        private void FixedUpdate()
+        public void FixedUpdate()
         {
             if (playerScale != targetScale) LerpSize();
-        }
-
-        public override void Configure(IModConfig config)
-        {
-            base.Configure(config);
-            autoRadius = config.GetSettingsValue<bool>("Auto Radius");
-            height = config.GetSettingsValue<float>("Height (Default 1)");
-            radius = config.GetSettingsValue<float>("Radius (Default 1)");
-            pitchChangeEnabled = config.GetSettingsValue<bool>("Change Pitch Depending on Height");
-            storyEnabled = config.GetSettingsValue<bool>("Enable Story (Requires Reload!)");
-            Setup();
         }
 
         public void Setup()
         {
             // Make sure that the scene is the SS or Eye
-            if (WrongScene()) return;
-            // Cancel otherwise
+            OWScene scene = LoadManager.s_currentScene;
+            if (scene != OWScene.SolarSystem && scene != OWScene.EyeOfTheUniverse) return;
 
             if (autoRadius) targetScale = new Vector3(Mathf.Sqrt(height), height, Mathf.Sqrt(height));
             else targetScale = new Vector3(radius, height, radius);
@@ -158,25 +111,6 @@ namespace SmolHatchling
                     mirrorController = mirrorControllers[0];
                     break;
             }
-
-            emberTwin = GameObject.Find("CaveTwin_Body");
-            ashTwin = GameObject.Find("TowerTwin_Body");
-            timberHearth = GameObject.Find("TimberHearth_Body");
-            attlerock = GameObject.Find("Moon_Body");
-            brittleHollow = GameObject.Find("BrittleHollow_Body");
-            hollowsLantern = GameObject.Find("VolcanicMoon_Body");
-            giantsDeep = GameObject.Find("GiantsDeep_Body");
-            darkBramble = GameObject.Find("DarkBramble_Body");
-            quantumMoon = GameObject.Find("QuantumMoon_Body");
-            stranger = GameObject.Find("RingWorld_Body");
-            dreamWorld = GameObject.Find("DreamWorld_Body");
-
-            hearthTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_HEA_VillagePlanks_mat").FirstOrDefault();
-            nomaiTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_NOM_HexagonTile_mat").FirstOrDefault();
-            quantumTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Terrain_QM_CenterArch_mat").FirstOrDefault();
-            strangerTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_IP_Mangrove_Wood_mat").FirstOrDefault();
-            dreamTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_DW_Mangrove_Wood_mat").FirstOrDefault();
-            simTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Terrain_IP_DreamGridVP_mat").FirstOrDefault();
         }
 
         public void SnapSize()
@@ -219,8 +153,6 @@ namespace SmolHatchling
             // Change size of Ash Twin Project player clone if it exists
             if (npcPlayer != null) npcPlayer.GetComponentInChildren<Animator>().gameObject.transform.localScale = playerScale / 10;
 
-            //UpdateStoolSize();
-
             // Change pitch if enabled
             switch (pitchChangeEnabled)
             {
@@ -249,21 +181,9 @@ namespace SmolHatchling
                     break;
             }
         }
-
-        // SetupStory()
-
-        // PlaceObject()
-
-        // PlaceObject()
-
-        // UpdateStoolSize()
-
-        // ChangeDialogueTree()
-
-        // AddTranslations()
     }
 
-    public static class Patches
+    public static class SmolHatchlingPatches
     {
         public static void CharacterStart()
         {
@@ -273,9 +193,9 @@ namespace SmolHatchling
 
         public static void GhostLiftedPlayer(GhostGrabController __instance)
         {
-            Vector3 playerScale = SmolHatchling.Instance.playerScale;
+            Vector3 targetScale = SmolHatchling.Instance.targetScale;
             // Offset attachment so that camera is where it normally is
-            __instance._attachPoint._attachOffset = new Vector3(0, 1.8496f - 1.8496f * playerScale.y, 0.15f - 0.15f * playerScale.z);
+            __instance._attachPoint._attachOffset = new Vector3(0, 1.8496f - 1.8496f * targetScale.y, 0.15f - 0.15f * targetScale.z);
         }
 
         public static void NPCPlayerAwake(PlayerScreamingController __instance)
@@ -299,111 +219,12 @@ namespace SmolHatchling
             __instance._mirrorPlayer.transform.Find("Traveller_HEA_Player_v2 (2)").localScale = playerScale / 10;
         }
 
-        public static void ChertDialogueSwapped()
-        {
-            //if (SmolHatchling.Instance.storyEnabledNow) SmolHatchling.Instance.ChangeDialogueTree("Chert");
-        }
-
-        public static void StoolTransformed(StoolItem __instance)
-        {
-            if (!__instance.GetComponent<StoolItem>()) return;
-
-            if (__instance.GetComponentInParent<PlayerCameraController>())
-            {
-                __instance.transform.localPosition = new Vector3(0.2f, -0.5f, 0.3f);
-            }
-            else if (__instance.GetComponentInParent<StoolSocket>())
-            {
-                __instance.EnableInteraction(false);
-                __instance.SetColliderActivation(true);
-            }
-            else
-            {
-                __instance.EnableInteraction(true);
-                __instance.SetColliderActivation(true);
-            }
-        }
-
-        public static void PlayerToAttachPoint(PlayerAttachPoint __instance)
-        {
-            if (__instance.gameObject.GetComponentInChildren<StoolSocket>())
-            {
-                Vector3 playerScale = SmolHatchling.Instance.playerScale;
-                if (__instance.gameObject.GetComponentInChildren<StoolSocket>()._socketedItem != null) __instance.SetAttachOffset(new Vector3(0f, 1.8496f - 1.8496f * playerScale.y, 0.15f - 0.15f * playerScale.z));
-                else __instance.SetAttachOffset(new Vector3(0, 0, 0));
-
-            }
-        }
-
         public static bool IsValidGroundedHit(ref bool __result, RaycastHit hit)
         {
             // This patch is disabled because while it fixes the problem of the player becoming ungrounded
             // when next to a wall, it causes a bigger problem of allowing the player to be grounded ON a wall.
             __result = hit.distance > -(0.5f - SmolHatchling.Instance.playerScale.z * 0.5f) && hit.rigidbody != Locator.GetPlayerController()._owRigidbody.GetRigidbody();
             return false;
-        }
-    }
-
-    public class StoolItem : OWItem
-    {
-        public override string GetDisplayName()
-        {
-            return "Stool";
-        }
-
-        public override void Awake()
-        {
-            _type = (ItemType)256;
-            base.Awake();
-        }
-    }
-
-    public class StoolSocket : OWItemSocket
-    {
-        public override bool AcceptsItem(OWItem item)
-        {
-            return item.GetComponent<StoolItem>() != null;
-        }
-
-        public override void Awake()
-        {
-            _acceptableType = (ItemType)256;
-            _socketTransform = transform;
-            gameObject.layer = 21;
-
-            if (_sector == null)
-            {
-                _sector = GetComponentInParent<Sector>();
-            }
-            if (_sector == null)
-            {
-                //Debug.LogError("Could not find Sector in OWItemSocket parents", this);
-                Debug.Break();
-            }
-            if (_socketTransform.childCount > 0)
-            {
-                _socketedItem = _socketTransform.GetComponentInChildren<OWItem>();
-            }
-        }
-    }
-
-    public class SmolHatchlingAPI
-    {
-        // This API was added for support with HikersMod, since HikersMod needs to know the scale and animspeed of the
-        // hatchling.
-        public Vector3 GetPlayerScale()
-        {
-            return SmolHatchling.Instance.playerScale;
-        }
-
-        public float GetAnimSpeed()
-        {
-            return SmolHatchling.Instance.animSpeed;
-        }
-
-        public void SetHikersModEnabled()
-        {
-            SmolHatchling.Instance.hikersModEnabled = true;
         }
     }
 }

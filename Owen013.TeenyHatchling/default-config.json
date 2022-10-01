@@ -1,10 +1,9 @@
 {
 	"enabled": true,
 	"settings": {
-		"Auto Radius": true,
+		"Auto-Radius": true,
 		"Height (Default 1)": 0.5,
-		"Radius (Default 1)": 0.75,
-		"Change Pitch Depending on Height": true,
-		"Enable Story (Requires Reload!)": false
+		"Radius (Default 1)": 1,
+		"Change Pitch Depending on Height": true
 	}
 }
