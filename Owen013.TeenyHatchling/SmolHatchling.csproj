@@ -4,7 +4,7 @@
     <TargetFramework>net48</TargetFramework>
     <OutputPath>Build</OutputPath>
     <AssemblyTitle>Owen013.SmolHatchling</AssemblyTitle>
-    <Product>Owen013.SmolHatchling</Product>
+    <Product>Owen013.SmollerWilds</Product>
     <Copyright>Copyright ©  2020</Copyright>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
@@ -30,7 +30,8 @@
     <Content Include="SmolHatchling.csproj.user" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="OuterWildsGameLibs" Version="1.1.12.168" />
-    <PackageReference Include="OWML" Version="2.3.3" />
+    <PackageReference Include="HarmonyX" Version="2.10.0" />
+    <PackageReference Include="OuterWildsGameLibs" Version="1.1.13.393" />
+    <PackageReference Include="OWML" Version="2.6.0" />
   </ItemGroup>
 </Project>
