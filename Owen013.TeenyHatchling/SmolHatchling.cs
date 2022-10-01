@@ -56,8 +56,8 @@ namespace SmolHatchling
         private void Start()
         {
             // Load assets
-            textAssets = ModHelper.Assets.LoadBundle("Assets/textassets");
-            models = ModHelper.Assets.LoadBundle("Assets/models");
+            //textAssets = ModHelper.Assets.LoadBundle("Assets/textassets");
+            //models = ModHelper.Assets.LoadBundle("Assets/models");
 
             // Add patches
             ModHelper.HarmonyHelper.AddPostfix<PlayerCharacterController>("Start", typeof(Patches), nameof(Patches.CharacterStart));
