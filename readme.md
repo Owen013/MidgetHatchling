@@ -3,6 +3,7 @@ Makes the hatchling smol! Very cute.
 
 ![SmolHatchlingIcon](https://user-images.githubusercontent.com/96493201/169907724-09f10c4f-a19a-40f7-856c-a7e877974ae2.png)
 ![SmolHatchling01](https://user-images.githubusercontent.com/96493201/162309870-99a89419-9dd8-4d47-a663-31437ce844b9.png)
+![SmolHatchling05](https://user-images.githubusercontent.com/96493201/193469258-fcf07a0c-669b-4146-b4d0-bf380313151b.png)
 
 With your smaller size, you might be able to squeeze yourself into tighter spaces!
 
