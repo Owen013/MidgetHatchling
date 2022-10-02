@@ -9,11 +9,12 @@ namespace SmolHatchling
     {
         // Config vars
         public float height, radius, animSpeed;
-        public bool autoRadius, pitchChangeEnabled, storyEnabled, stoolsEnabled, storyEnabledNow, hikersModEnabled;
+        public bool autoRadius, pitchChangeEnabled, storyEnabled, stoolsEnabled, hikersModEnabled;
+        public string colliderMode;
 
         // Mod vars
         public static SmolHatchling Instance;
-        public Vector3 targetScale, playerScale;
+        public Vector3 targetScale, playerScale, colliderScale;
         public GameObject playerModel, playerThruster, playerMarshmallowStick, npcPlayer;
         private PlayerBody playerBody;
         private PlayerCameraController cameraController;
@@ -34,9 +35,10 @@ namespace SmolHatchling
         public override void Configure(IModConfig config)
         {
             base.Configure(config);
-            autoRadius = config.GetSettingsValue<bool>("Auto-Radius");
             height = config.GetSettingsValue<float>("Height (Default 1)");
             radius = config.GetSettingsValue<float>("Radius (Default 1)");
+            autoRadius = config.GetSettingsValue<bool>("Auto-Radius");
+            colliderMode = config.GetSettingsValue<string>("Resize Collider");
             pitchChangeEnabled = config.GetSettingsValue<bool>("Change Pitch Depending on Height");
             //stoolsEnabled = config.GetSettingsValue<bool>("Enable Stools (Requires Reload!)");
             //storyEnabled = config.GetSettingsValue<bool>("Enable Story (Requires Reload!)");
@@ -63,6 +65,7 @@ namespace SmolHatchling
         public void FixedUpdate()
         {
             if (playerScale != targetScale) LerpSize();
+            if (targetScale != null && colliderMode != null && playerCollider != null) UpdateColliderScale();
         }
 
         public void Setup()
@@ -130,12 +133,6 @@ namespace SmolHatchling
             // Required temp vars
             float height = 2 * playerScale.y;
             float radius = Mathf.Min(playerScale.z / 2, height / 2);
-            Vector3 center = new Vector3(0, playerScale.y - 1, 0);
-
-            // Change collider height and radius, and move colliders down so they touch the ground
-            playerCollider.height = detectorCollider.height = detectorShape.height = height;
-            playerCollider.radius = detectorCollider.radius = detectorShape.radius = radius;
-            playerCollider.center = detectorCollider.center = detectorShape.center = playerBody._centerOfMass = playerCollider.center = detectorCollider.center = playerBody._activeRigidbody.centerOfMass = center;
 
             // Change playermodel size and animation speed
             playerModel.transform.localScale = playerScale / 10;
@@ -149,9 +146,13 @@ namespace SmolHatchling
             cameraController._origLocalPosition = new Vector3(0f, -1 + 1.8496f * playerScale.y, 0.15f * playerScale.z);
             cameraController.transform.localPosition = cameraController._origLocalPosition;
             playerMarshmallowStick.transform.localPosition = new Vector3(0.25f, -1.8496f + 1.8496f * playerScale.y, 0.08f - 0.15f + 0.15f * playerScale.z);
-
+            
             // Change size of Ash Twin Project player clone if it exists
-            if (npcPlayer != null) npcPlayer.GetComponentInChildren<Animator>().gameObject.transform.localScale = playerScale / 10;
+            if (npcPlayer != null)
+            {
+                npcPlayer.GetComponentInChildren<Animator>().gameObject.transform.localScale = playerScale / 10;
+                npcPlayer.transform.Find("NPC_Player_FocalPoint").localPosition = new Vector3(-0.093f, 0.991f * targetScale.y, 0.102f);
+            }
 
             // Change pitch if enabled
             switch (pitchChangeEnabled)
@@ -180,6 +181,20 @@ namespace SmolHatchling
                     mirrorController._mirrorPlayer.transform.Find("Traveller_HEA_Player_v2 (2)").localScale = playerScale / 10;
                     break;
             }
+        }
+
+        public void UpdateColliderScale()
+        {
+            // Change collider height and radius, and move colliders down so they touch the ground
+            if (colliderMode == "Height & Radius") colliderScale = targetScale;
+            else if (colliderMode == "Height Only") colliderScale = new Vector3(1, targetScale.y, 1);
+            else colliderScale = Vector3.one;
+            float height = 2 * colliderScale.y;
+            float radius = Mathf.Min(colliderScale.z / 2, height / 2);
+            Vector3 center = new Vector3(0, colliderScale.y - 1, 0);
+            playerCollider.height = detectorCollider.height = detectorShape.height = height;
+            playerCollider.radius = detectorCollider.radius = detectorShape.radius = radius;
+            playerCollider.center = detectorCollider.center = detectorShape.center = playerBody._centerOfMass = playerCollider.center = detectorCollider.center = playerBody._activeRigidbody.centerOfMass = center;
         }
     }
 

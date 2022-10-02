@@ -1,9 +1,17 @@
 {
 	"enabled": true,
 	"settings": {
-		"Auto-Radius": true,
 		"Height (Default 1)": 0.5,
 		"Radius (Default 1)": 1,
-		"Change Pitch Depending on Height": true
+		"Auto-Radius": true,
+		"Resize Collider": {
+			"type": "selector",
+			"value": "Don't Resize",
+			"options": [ "Don't Resize", "Height Only", "Height & Radius" ],
+			"title": "Resize Collider (A bit buggy)"
+		},
+		"Change Pitch Depending on Height": true,
+		"Enable Stools (Requires Reload!)": true,
+		"Enable Story (Requires Reload!)": true
 	}
 }
