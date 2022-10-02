@@ -42,6 +42,10 @@ namespace SmolHatchling
             pitchChangeEnabled = config.GetSettingsValue<bool>("Change Pitch Depending on Height");
             //stoolsEnabled = config.GetSettingsValue<bool>("Enable Stools (Requires Reload!)");
             //storyEnabled = config.GetSettingsValue<bool>("Enable Story (Requires Reload!)");
+            //,
+            //"Enable Stools (Requires Reload!)": true,
+            //"Enable Story (Requires Reload!)": true
+
             Setup();
         }
 

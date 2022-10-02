@@ -10,8 +10,6 @@
 			"options": [ "Don't Resize", "Height Only", "Height & Radius" ],
 			"title": "Resize Collider (A bit buggy)"
 		},
-		"Change Pitch Depending on Height": true,
-		"Enable Stools (Requires Reload!)": true,
-		"Enable Story (Requires Reload!)": true
+		"Change Pitch Depending on Height": true
 	}
 }
