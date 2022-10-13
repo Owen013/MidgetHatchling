@@ -1,4 +1,5 @@
-﻿using OWML.Common;
+﻿using HarmonyLib;
+using OWML.Common;
 using OWML.ModHelper;
 using System.Collections.Generic;
 using UnityEngine;
@@ -42,9 +43,6 @@ namespace SmolHatchling
             pitchChangeEnabled = config.GetSettingsValue<bool>("Change Pitch Depending on Height");
             //stoolsEnabled = config.GetSettingsValue<bool>("Enable Stools (Requires Reload!)");
             //storyEnabled = config.GetSettingsValue<bool>("Enable Story (Requires Reload!)");
-            //,
-            //"Enable Stools (Requires Reload!)": true,
-            //"Enable Story (Requires Reload!)": true
 
             Setup();
         }
@@ -52,15 +50,11 @@ namespace SmolHatchling
         public void Awake()
         {
             Instance = this;
+            Harmony.CreateAndPatchAll(typeof(SmolHatchlingPatches));
         }
 
         public void Start()
         {
-            ModHelper.HarmonyHelper.AddPostfix<PlayerCharacterController>("Start", typeof(SmolHatchlingPatches), nameof(SmolHatchlingPatches.CharacterStart));
-            ModHelper.HarmonyHelper.AddPostfix<GhostGrabController>("OnStartLiftPlayer", typeof(SmolHatchlingPatches), nameof(SmolHatchlingPatches.GhostLiftedPlayer));
-            ModHelper.HarmonyHelper.AddPostfix<PlayerScreamingController>("Awake", typeof(SmolHatchlingPatches), nameof(SmolHatchlingPatches.NPCPlayerAwake));
-            ModHelper.HarmonyHelper.AddPostfix<PlayerCloneController>("Start", typeof(SmolHatchlingPatches), nameof(SmolHatchlingPatches.EyeCloneStart));
-            ModHelper.HarmonyHelper.AddPostfix<EyeMirrorController>("Start", typeof(SmolHatchlingPatches), nameof(SmolHatchlingPatches.EyeMirrorStart));
             //gameObject.AddComponent<StoolController>();
             //gameObject.AddComponent<StoryController>();
             ModHelper.Console.WriteLine($"Smol Hatchling is ready to go!", MessageType.Success);
@@ -134,10 +128,6 @@ namespace SmolHatchling
 
         public void UpdatePlayerScale()
         {
-            // Required temp vars
-            float height = 2 * playerScale.y;
-            float radius = Mathf.Min(playerScale.z / 2, height / 2);
-
             // Change playermodel size and animation speed
             playerModel.transform.localScale = playerScale / 10;
             playerModel.transform.localPosition = new Vector3(0, -1.03f, -0.2f * playerScale.z);
@@ -200,50 +190,15 @@ namespace SmolHatchling
             playerCollider.radius = detectorCollider.radius = detectorShape.radius = radius;
             playerCollider.center = detectorCollider.center = detectorShape.center = playerBody._centerOfMass = playerCollider.center = detectorCollider.center = playerBody._activeRigidbody.centerOfMass = center;
         }
-    }
 
-    public static class SmolHatchlingPatches
-    {
-        public static void CharacterStart()
+        public void PrintLog(string text)
         {
-            SmolHatchling.Instance.Setup();
-            SmolHatchling.Instance.SnapSize();
+            ModHelper.Console.WriteLine(text);
         }
 
-        public static void GhostLiftedPlayer(GhostGrabController __instance)
+        public void PrintLog(string text, MessageType messageType)
         {
-            Vector3 targetScale = SmolHatchling.Instance.targetScale;
-            // Offset attachment so that camera is where it normally is
-            __instance._attachPoint._attachOffset = new Vector3(0, 1.8496f - 1.8496f * targetScale.y, 0.15f - 0.15f * targetScale.z);
-        }
-
-        public static void NPCPlayerAwake(PlayerScreamingController __instance)
-        {
-            SmolHatchling.Instance.npcPlayer = __instance.gameObject;
-        }
-
-        public static void EyeCloneStart(PlayerCloneController __instance)
-        {
-            Vector3 playerScale = SmolHatchling.Instance.playerScale;
-            float pitch;
-            __instance._playerVisuals.transform.localScale = playerScale / 10;
-            if (SmolHatchling.Instance.pitchChangeEnabled) pitch = 0.5f * Mathf.Pow(playerScale.y, -1f) + 0.5f;
-            else pitch = 1;
-            __instance._signal._owAudioSource.pitch = pitch;
-        }
-
-        public static void EyeMirrorStart(EyeMirrorController __instance)
-        {
-            Vector3 playerScale = SmolHatchling.Instance.playerScale;
-            __instance._mirrorPlayer.transform.Find("Traveller_HEA_Player_v2 (2)").localScale = playerScale / 10;
-        }
-
-        public static bool IsValidGroundedHit(ref bool __result, RaycastHit hit)
-        {
-            // This patch is disabled because while it fixes the problem of the player becoming ungrounded
-            // when next to a wall, it causes a bigger problem of allowing the player to be grounded ON a wall.
-            __result = hit.distance > -(0.5f - SmolHatchling.Instance.playerScale.z * 0.5f) && hit.rigidbody != Locator.GetPlayerController()._owRigidbody.GetRigidbody();
-            return false;
+            ModHelper.Console.WriteLine(text, messageType);
         }
     }
 }
