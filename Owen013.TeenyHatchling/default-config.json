@@ -1,15 +1,24 @@
 {
-	"enabled": true,
-	"settings": {
-		"Height (Default 1)": 0.5,
-		"Radius (Default 1)": 1,
-		"Auto-Radius": true,
-		"Resize Collider": {
-			"type": "selector",
-			"value": "Don't Resize",
-			"options": [ "Don't Resize", "Height Only", "Height & Radius" ],
-			"title": "Resize Collider (A bit buggy)"
-		},
-		"Change Pitch Depending on Height": true
-	}
+  "enabled": true,
+  "settings": {
+    "Hatchling Size": {
+      "type": "separator"
+    },
+    "Height %": 0.5,
+    "Radius %": 0.7,
+    "Auto-Radius": true,
+    "Resize Collider": {
+      "type": "selector",
+      "value": "Height & Radius",
+      "options": [ "Don't Resize", "Height Only", "Height & Radius" ],
+      "title": "Resize Collider (A bit buggy)"
+    },
+
+    "Misc:": {
+      "type": "separator"
+    },
+    "Change Pitch Depending on Height": true,
+    "Disable Stools (Requires Reload!)": false,
+    "Enable Debug Log": false
+  }
 }

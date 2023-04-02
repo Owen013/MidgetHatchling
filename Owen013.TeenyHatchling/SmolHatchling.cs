@@ -9,8 +9,8 @@ namespace SmolHatchling
     public class SmolHatchling : ModBehaviour
     {
         // Config vars
+        public bool debugLogEnabled, autoRadius, pitchChangeEnabled, storyEnabled, disableStools, hikersModEnabled;
         public float height, radius, animSpeed;
-        public bool autoRadius, pitchChangeEnabled, storyEnabled, stoolsEnabled, hikersModEnabled;
         public string colliderMode;
 
         // Mod vars
@@ -27,6 +27,7 @@ namespace SmolHatchling
         private PlayerCloneController cloneController;
         private EyeMirrorController mirrorController;
         private List<OWAudioSource> playerAudio;
+        public bool characterLoaded;
 
         public override object GetApi()
         {
@@ -36,15 +37,16 @@ namespace SmolHatchling
         public override void Configure(IModConfig config)
         {
             base.Configure(config);
-            height = config.GetSettingsValue<float>("Height (Default 1)");
-            radius = config.GetSettingsValue<float>("Radius (Default 1)");
+            debugLogEnabled = config.GetSettingsValue<bool>("Enable Debug Log");
+            height = config.GetSettingsValue<float>("Height %");
+            radius = config.GetSettingsValue<float>("Radius %");
             autoRadius = config.GetSettingsValue<bool>("Auto-Radius");
             colliderMode = config.GetSettingsValue<string>("Resize Collider");
             pitchChangeEnabled = config.GetSettingsValue<bool>("Change Pitch Depending on Height");
-            //stoolsEnabled = config.GetSettingsValue<bool>("Enable Stools (Requires Reload!)");
+            disableStools = config.GetSettingsValue<bool>("Disable Stools (Requires Reload!)");
             //storyEnabled = config.GetSettingsValue<bool>("Enable Story (Requires Reload!)");
 
-            Setup();
+            UpdateTargetScale();
         }
 
         public void Awake()
@@ -55,26 +57,25 @@ namespace SmolHatchling
 
         public void Start()
         {
-            //gameObject.AddComponent<StoolController>();
+            // Add components
+            gameObject.AddComponent<StoolController>();
             //gameObject.AddComponent<StoryController>();
+
+            // Set characterLoaded to false at the beginning of each scene load
+            LoadManager.OnStartSceneLoad += (scene, loadScene) => characterLoaded = false;
+
+            // Ready
             ModHelper.Console.WriteLine($"Smol Hatchling is ready to go!", MessageType.Success);
         }
 
         public void FixedUpdate()
         {
             if (playerScale != targetScale) LerpSize();
-            if (targetScale != null && colliderMode != null && playerCollider != null) UpdateColliderScale();
+            UpdateColliderScale();
         }
 
-        public void Setup()
+        public void OnCharacterStart()
         {
-            // Make sure that the scene is the SS or Eye
-            OWScene scene = LoadManager.s_currentScene;
-            if (scene != OWScene.SolarSystem && scene != OWScene.EyeOfTheUniverse) return;
-
-            if (autoRadius) targetScale = new Vector3(Mathf.Sqrt(height), height, Mathf.Sqrt(height));
-            else targetScale = new Vector3(radius, height, radius);
-
             playerBody = FindObjectOfType<PlayerBody>();
             playerCollider = playerBody.GetComponent<CapsuleCollider>();
             detectorCollider = playerBody.transform.Find("PlayerDetector").GetComponent<CapsuleCollider>();
@@ -112,15 +113,25 @@ namespace SmolHatchling
                     mirrorController = mirrorControllers[0];
                     break;
             }
+
+            characterLoaded = true;
+            UpdateTargetScale();
+            SnapSize();
         }
 
-        public void SnapSize()
+        private void UpdateTargetScale()
+        {
+            if (autoRadius) targetScale = new Vector3(Mathf.Sqrt(height), height, Mathf.Sqrt(height));
+            else targetScale = new Vector3(radius, height, radius);
+        }
+
+        private void SnapSize()
         {
             playerScale = targetScale;
             UpdatePlayerScale();
         }
 
-        public void LerpSize()
+        private void LerpSize()
         {
             playerScale = Vector3.Lerp(playerScale, targetScale, 0.125f);
             UpdatePlayerScale();
@@ -128,6 +139,8 @@ namespace SmolHatchling
 
         public void UpdatePlayerScale()
         {
+            if (!IsCorrectScene() || !characterLoaded) return;
+
             // Change playermodel size and animation speed
             playerModel.transform.localScale = playerScale / 10;
             playerModel.transform.localPosition = new Vector3(0, -1.03f, -0.2f * playerScale.z);
@@ -177,8 +190,10 @@ namespace SmolHatchling
             }
         }
 
-        public void UpdateColliderScale()
+        private void UpdateColliderScale()
         {
+            if (!IsCorrectScene() || !characterLoaded) return;
+
             // Change collider height and radius, and move colliders down so they touch the ground
             if (colliderMode == "Height & Radius") colliderScale = targetScale;
             else if (colliderMode == "Height Only") colliderScale = new Vector3(1, targetScale.y, 1);
@@ -191,13 +206,20 @@ namespace SmolHatchling
             playerCollider.center = detectorCollider.center = detectorShape.center = playerBody._centerOfMass = playerCollider.center = detectorCollider.center = playerBody._activeRigidbody.centerOfMass = center;
         }
 
+        private bool IsCorrectScene()
+        {
+            return LoadManager.s_currentScene == OWScene.SolarSystem || LoadManager.s_currentScene == OWScene.EyeOfTheUniverse;
+        }
+
         public void PrintLog(string text)
         {
+            if (!debugLogEnabled) return;
             ModHelper.Console.WriteLine(text);
         }
 
         public void PrintLog(string text, MessageType messageType)
         {
+            if (!debugLogEnabled) return;
             ModHelper.Console.WriteLine(text, messageType);
         }
     }

@@ -9,8 +9,7 @@ namespace SmolHatchling
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
         public static void CharacterStart()
         {
-            SmolHatchling.Instance.Setup();
-            SmolHatchling.Instance.SnapSize();
+            SmolHatchling.Instance.OnCharacterStart();
         }
 
         [HarmonyPostfix]
