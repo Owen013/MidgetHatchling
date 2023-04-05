@@ -40,7 +40,7 @@ namespace SmolHatchling
             _colliderMode = config.GetSettingsValue<string>("Resize Collider");
             _pitchChangeEnabled = config.GetSettingsValue<bool>("Change Pitch Depending on Height");
             _disableStools = config.GetSettingsValue<bool>("Disable Stools (Requires Reload!)");
-            _storyEnabled = config.GetSettingsValue<bool>("Enable Story (Requires Reload!)");
+            _storyEnabled = false;// config.GetSettingsValue<bool>("Enable Story (Requires Reload!)");
 
             UpdateTargetScale();
         }
