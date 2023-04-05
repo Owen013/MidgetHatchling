@@ -1,0 +1,32 @@
+ManifestFileVersion: 0
+CRC: 3136212065
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 44a4e4de189579a78170a3502c08b169
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 5ad585dd02dfb5016c0dad519eab8f49
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/textassets/Mica.txt
+- Assets/textassets/Gabbro_merge.txt
+- Assets/textassets/Hornfels.txt
+- Assets/textassets/Gabbro_2F.txt
+- Assets/textassets/Tuff.txt
+- Assets/textassets/Gabbro_3T.txt
+- Assets/textassets/SH_LaunchCodesNote.txt
+- Assets/textassets/TephraPostObservatory.txt
+- Assets/textassets/Tektite_ImpactCrater.txt
+- Assets/textassets/Gabbro_2T.txt
+- Assets/textassets/Esker.txt
+- Assets/textassets/Galena.txt
+- Assets/textassets/Slate.txt
+- Assets/textassets/Gabbro_1.txt
+- Assets/textassets/Tephra.txt
+- Assets/textassets/Gabbro_3F.txt
+Dependencies: []

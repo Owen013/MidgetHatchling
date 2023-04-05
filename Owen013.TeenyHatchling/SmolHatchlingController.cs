@@ -39,8 +39,8 @@ namespace SmolHatchling
             _autoRadius = config.GetSettingsValue<bool>("Auto-Radius");
             _colliderMode = config.GetSettingsValue<string>("Resize Collider");
             _pitchChangeEnabled = config.GetSettingsValue<bool>("Change Pitch Depending on Height");
-            //_disableStools = config.GetSettingsValue<bool>("Disable Stools (Requires Reload!)");
-            //_storyEnabled = config.GetSettingsValue<bool>("Enable Story (Requires Reload!)");
+            _disableStools = config.GetSettingsValue<bool>("Disable Stools (Requires Reload!)");
+            _storyEnabled = config.GetSettingsValue<bool>("Enable Story (Requires Reload!)");
 
             UpdateTargetScale();
         }
@@ -48,14 +48,14 @@ namespace SmolHatchling
         public void Awake()
         {
             Instance = this;
-            Harmony.CreateAndPatchAll(typeof(SmolHatchlingPatches));
+            Harmony.CreateAndPatchAll(typeof(SmolHatchlingController));
         }
 
         public void Start()
         {
             // Add components
-            //gameObject.AddComponent<StoolController>();
-            //gameObject.AddComponent<StoryController>();
+            gameObject.AddComponent<StoolController>();
+            gameObject.AddComponent<StoryController>();
 
             // Set characterLoaded to false at the beginning of each scene load
             LoadManager.OnStartSceneLoad += (scene, loadScene) => _characterLoaded = false;
@@ -115,7 +115,7 @@ namespace SmolHatchling
             UpdateTargetScale();
             SnapSize();
 
-            //if (StoryController.Instance._storyEnabledNow) SetStoryAttributes();
+            if (StoryController.Instance._storyEnabledNow) SetStoryAttributes();
         }
 
         public void UpdateTargetScale()
@@ -228,6 +228,49 @@ namespace SmolHatchling
         {
             if (!_debugLogEnabled) return;
             ModHelper.Console.WriteLine(text, messageType);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
+        public static void CharacterStart()
+        {
+            SmolHatchlingController.Instance.OnCharacterStart();
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(GhostGrabController), nameof(GhostGrabController.OnStartLiftPlayer))]
+        public static void GhostLiftedPlayer(GhostGrabController __instance)
+        {
+            Vector3 targetScale = SmolHatchlingController.Instance._targetScale;
+            // Offset attachment so that camera is where it normally is
+            __instance._attachPoint._attachOffset = new Vector3(0, 1.8496f - 1.8496f * targetScale.y, 0.15f - 0.15f * targetScale.z);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(PlayerScreamingController), nameof(PlayerScreamingController.Awake))]
+        public static void NPCPlayerAwake(PlayerScreamingController __instance)
+        {
+            SmolHatchlingController.Instance._npcPlayer = __instance.gameObject;
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(PlayerCloneController), nameof(PlayerCloneController.Start))]
+        public static void EyeCloneStart(PlayerCloneController __instance)
+        {
+            Vector3 playerScale = SmolHatchlingController.Instance._playerScale;
+            float pitch;
+            __instance._playerVisuals.transform.localScale = playerScale / 10;
+            if (SmolHatchlingController.Instance._pitchChangeEnabled) pitch = 0.5f * Mathf.Pow(playerScale.y, -1f) + 0.5f;
+            else pitch = 1;
+            __instance._signal._owAudioSource.pitch = pitch;
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(EyeMirrorController), nameof(EyeMirrorController.Start))]
+        public static void EyeMirrorStart(EyeMirrorController __instance)
+        {
+            Vector3 playerScale = SmolHatchlingController.Instance._playerScale;
+            __instance._mirrorPlayer.transform.Find("Traveller_HEA_Player_v2 (2)").localScale = playerScale / 10;
         }
     }
 }
