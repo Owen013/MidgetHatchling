@@ -14,11 +14,10 @@
       "title": "Resize Collider (A bit buggy)"
     },
 
-    "Misc:": {
+    "Misc": {
       "type": "separator"
     },
     "Change Pitch Depending on Height": true,
-    "Disable Stools (Requires Reload!)": false,
     "Enable Debug Log": false
   }
 }

@@ -6,7 +6,7 @@ namespace SmolHatchling
     public static class StoolControllerPatches
     {
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(SmolHatchling), nameof(SmolHatchling.UpdatePlayerScale))]
+        [HarmonyPatch(typeof(SmolHatchlingController), nameof(SmolHatchlingController.UpdatePlayerScale))]
         public static void OnUpdatePlayerScale()
         {
             StoolController.Instance.UpdateStoolSize();
@@ -41,7 +41,7 @@ namespace SmolHatchling
         {
             if (__instance.gameObject.GetComponentInChildren<StoolSocket>())
             {
-                Vector3 playerScale = SmolHatchling.Instance.playerScale;
+                Vector3 playerScale = SmolHatchlingController.Instance._playerScale;
                 if (__instance.gameObject.GetComponentInChildren<StoolSocket>()._socketedItem != null) __instance.SetAttachOffset(new Vector3(0f, 1.8496f - 1.8496f * playerScale.y, 0.15f - 0.15f * playerScale.z));
                 else __instance.SetAttachOffset(new Vector3(0, 0, 0));
 

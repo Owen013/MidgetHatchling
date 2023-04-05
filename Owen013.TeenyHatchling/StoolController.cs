@@ -8,9 +8,9 @@ namespace SmolHatchling
     public class StoolController : MonoBehaviour
     {
         public static StoolController Instance;
-        private AssetBundle models;
-        private List<GameObject> stools;
-        private Material hearthTexture, nomaiTexture, quantumTexture, strangerTexture, dreamTexture, simTexture;
+        public AssetBundle models;
+        public List<GameObject> stools;
+        public Material hearthTexture, nomaiTexture, quantumTexture, strangerTexture, dreamTexture, simTexture;
 
         public void Awake()
         {
@@ -22,14 +22,14 @@ namespace SmolHatchling
         {
             LoadManager.OnCompleteSceneLoad += (scene, loadScene) =>
             {
-                if (models == null) models = SmolHatchling.Instance.ModHelper.Assets.LoadBundle("Assets/models");
+                if (models == null) models = SmolHatchlingController.Instance.ModHelper.Assets.LoadBundle("Assets/sh_models");
                 stools = new List<GameObject>();
-                if (SmolHatchling.Instance.disableStools == true) return;
+                if (SmolHatchlingController.Instance._disableStools == true) return;
                 if (loadScene == OWScene.SolarSystem) OnSolarSystemLoaded();
             };
         }
 
-        private void OnSolarSystemLoaded()
+        public void OnSolarSystemLoaded()
         {
             GameObject emberTwin = GameObject.Find("CaveTwin_Body");
             GameObject ashTwin = GameObject.Find("TowerTwin_Body");
@@ -103,7 +103,7 @@ namespace SmolHatchling
 
         }
 
-        private GameObject NewStool()
+        public GameObject NewStool()
         {
             GameObject stool = Instantiate(models.LoadAsset<GameObject>("SH_Stool"));
             GameObject real = stool.transform.Find("Real").gameObject;
@@ -119,7 +119,7 @@ namespace SmolHatchling
             return stool;
         }
 
-        private GameObject NewStoolSocket()
+        public GameObject NewStoolSocket()
         {
             // Add model rocket stool socket
             GameObject socketObject = new GameObject();
@@ -243,10 +243,10 @@ namespace SmolHatchling
                 GameObject realObject = stool.transform.Find("Real").gameObject;
                 GameObject dreamObject = stool.transform.Find("Simulation").gameObject;
                 BoxCollider collider = stool.GetComponent<BoxCollider>();
-                realObject.transform.localScale = dreamObject.transform.localScale = new Vector3(0.5f, -SmolHatchling.Instance.targetScale.y + 1, 0.5f);
-                collider.size = new Vector3(0.875f, 1.8f * -SmolHatchling.Instance.targetScale.y + 1.8f, 0.875f);
+                realObject.transform.localScale = dreamObject.transform.localScale = new Vector3(0.5f, -SmolHatchlingController.Instance._targetScale.y + 1, 0.5f);
+                collider.size = new Vector3(0.875f, 1.8f * -SmolHatchlingController.Instance._targetScale.y + 1.8f, 0.875f);
                 collider.center = new Vector3(0, 0.5f * collider.size.y, 0);
-                stool.SetActive(SmolHatchling.Instance.targetScale.y < 1);
+                stool.SetActive(SmolHatchlingController.Instance._targetScale.y < 1);
             }
         }
     }
