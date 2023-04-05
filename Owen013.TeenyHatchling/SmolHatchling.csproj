@@ -27,6 +27,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Assets\sh_textassets" />
+    <None Remove="Assets\sh_textassets" />
+    <None Remove="Assets\sh_textassets.manifest" />
+    <None Remove="Assets\sh_textassets.manifest" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="SmolHatchling.csproj.user" />
   </ItemGroup>
 </Project>

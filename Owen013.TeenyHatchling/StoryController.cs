@@ -54,8 +54,7 @@ namespace SmolHatchling
                 renderer.enabled = true;
             dialogueTree._attentionPoint = pageModel.transform;
             dialogueTree._characterName = "SH_LaunchCodesNote";
-            dialogueTree._xmlCharacterDialogueAsset = _textAssets.LoadAsset<TextAsset>("SH_LaunchCodesNote");
-            ChangeDialogueTree("SH_LaunchCodesNote");
+            //dialogueTree._xmlCharacterDialogueAsset = _textAssets.LoadAsset<TextAsset>("SH_LaunchCodesNote");
             interactVolume.enabled = true;
             interactVolume.EnableInteraction();
 
@@ -66,10 +65,16 @@ namespace SmolHatchling
         {
             // Change all dialogue trees
             ChangeAllDialogueTrees();
+            ChangeDialogueTree("SH_LaunchCodesNote");
         }
 
         public void ChangeAllDialogueTrees()
         {
+            if (_textAssets == null)
+            {
+                SmolHatchlingController.Instance.PrintLog("sh_textassets is null!");
+                return;
+            }
             var dialogueTrees = FindObjectsOfType<CharacterDialogueTree>();
             for (var i = 0; i < dialogueTrees.Length; ++i)
             {
@@ -85,6 +90,11 @@ namespace SmolHatchling
 
         public void ChangeDialogueTree(string dialogueName)
         {
+            if (_textAssets == null)
+            {
+                SmolHatchlingController.Instance.PrintLog("sh_textassets is null!");
+                return;
+            }
             var dialogueTrees = FindObjectsOfType<CharacterDialogueTree>();
             for (var i = 0; i < dialogueTrees.Length; ++i)
             {

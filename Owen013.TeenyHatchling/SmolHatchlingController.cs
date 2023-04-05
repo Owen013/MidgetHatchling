@@ -40,7 +40,7 @@ namespace SmolHatchling
             _colliderMode = config.GetSettingsValue<string>("Resize Collider");
             _pitchChangeEnabled = config.GetSettingsValue<bool>("Change Pitch Depending on Height");
             _disableStools = config.GetSettingsValue<bool>("Disable Stools (Requires Reload!)");
-            _storyEnabled = false;// config.GetSettingsValue<bool>("Enable Story (Requires Reload!)");
+            _storyEnabled = config.GetSettingsValue<bool>("Enable Story Mode GAMEPLAY ONLY (Requires Reload!)");
 
             UpdateTargetScale();
         }
@@ -55,7 +55,7 @@ namespace SmolHatchling
         {
             // Add components
             gameObject.AddComponent<StoolController>();
-            //gameObject.AddComponent<StoryController>();
+            gameObject.AddComponent<StoryController>();
 
             // Set characterLoaded to false at the beginning of each scene load
             LoadManager.OnStartSceneLoad += (scene, loadScene) => _characterLoaded = false;
