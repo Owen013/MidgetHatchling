@@ -17,13 +17,14 @@
     "Story Mode": {
       "type": "separator"
     },
-    "Enable Story Mode GAMEPLAY ONLY (Requires Reload!)": true,
+    "Enable Story Mode (Requires Reload!)": true,
+    "Use Story Mode Player Adjustments": true,
+    "Enable Stools (Requires Reload!)": true,
 
     "Misc": {
       "type": "separator"
     },
     "Change Pitch Depending on Height": true,
-    "Disable Stools (Requires Reload!)": false,
     "Enable Debug Log": false
   }
 }

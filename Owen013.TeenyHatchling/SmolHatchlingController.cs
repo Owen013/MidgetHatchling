@@ -9,9 +9,16 @@ namespace SmolHatchling
     public class SmolHatchlingController : ModBehaviour
     {
         // Config vars
-        public bool _debugLogEnabled, _autoRadius, _pitchChangeEnabled, _storyEnabled, _disableStools;
-        public float _height, _radius, _animSpeed;
+        public bool _debugLogEnabled;
+        public bool _autoRadius;
+        public bool _pitchChangeEnabled;
+        public float _height;
+        public float _radius;
+        public float _animSpeed;
         public string _colliderMode;
+        public bool _enableStools;
+        public bool _storyEnabled;
+        public bool _useStoryAttributes;
 
         // Mod vars
         public static SmolHatchlingController Instance;
@@ -39,10 +46,12 @@ namespace SmolHatchling
             _autoRadius = config.GetSettingsValue<bool>("Auto-Radius");
             _colliderMode = config.GetSettingsValue<string>("Resize Collider");
             _pitchChangeEnabled = config.GetSettingsValue<bool>("Change Pitch Depending on Height");
-            _disableStools = config.GetSettingsValue<bool>("Disable Stools (Requires Reload!)");
-            _storyEnabled = config.GetSettingsValue<bool>("Enable Story Mode GAMEPLAY ONLY (Requires Reload!)");
+            _useStoryAttributes = config.GetSettingsValue<bool>("Use Story Mode Player Adjustments");
+            _enableStools = config.GetSettingsValue<bool>("Enable Stools (Requires Reload!)");
+            _storyEnabled = config.GetSettingsValue<bool>("Enable Story Mode (Requires Reload!)");
 
             UpdateTargetScale();
+            UpdateStoryAttributes();
         }
 
         public void Awake()
@@ -53,10 +62,6 @@ namespace SmolHatchling
 
         public void Start()
         {
-            // Add components
-            gameObject.AddComponent<StoolController>();
-            gameObject.AddComponent<StoryController>();
-
             // Set characterLoaded to false at the beginning of each scene load
             LoadManager.OnStartSceneLoad += (scene, loadScene) => _characterLoaded = false;
 
@@ -114,8 +119,7 @@ namespace SmolHatchling
             _characterLoaded = true;
             UpdateTargetScale();
             SnapSize();
-
-            if (StoryController.Instance._storyEnabledNow) SetStoryAttributes();
+            UpdateStoryAttributes();
         }
 
         public void UpdateTargetScale()
@@ -205,12 +209,24 @@ namespace SmolHatchling
             _playerCollider.center = _detectorCollider.center = _detectorShape.center = _playerBody._centerOfMass = _playerCollider.center = _detectorCollider.center = _playerBody._activeRigidbody.centerOfMass = center;
         }
 
-        public void SetStoryAttributes()
+        public void UpdateStoryAttributes()
         {
-            _characterController._runSpeed = 4;
-            _characterController._strafeSpeed = 4;
-            _characterController._walkSpeed = 2;
-            _characterController._maxJumpSpeed = 5;
+            if (!IsCorrectScene() || !_characterLoaded) return;
+            if (_useStoryAttributes)
+            {
+                _characterController._runSpeed = 4;
+                _characterController._strafeSpeed = 4;
+                _characterController._walkSpeed = 2;
+                _characterController._maxJumpSpeed = 5;
+
+            }
+            else
+            {
+                _characterController._runSpeed = 6;
+                _characterController._strafeSpeed = 4;
+                _characterController._walkSpeed = 3;
+                _characterController._maxJumpSpeed = 7;
+            }
         }
 
         public bool IsCorrectScene()
@@ -234,14 +250,14 @@ namespace SmolHatchling
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
         public static void CharacterStart()
         {
-            SmolHatchlingController.Instance.OnCharacterStart();
+            Instance.OnCharacterStart();
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(GhostGrabController), nameof(GhostGrabController.OnStartLiftPlayer))]
         public static void GhostLiftedPlayer(GhostGrabController __instance)
         {
-            Vector3 targetScale = SmolHatchlingController.Instance._targetScale;
+            Vector3 targetScale = Instance._targetScale;
             // Offset attachment so that camera is where it normally is
             __instance._attachPoint._attachOffset = new Vector3(0, 1.8496f - 1.8496f * targetScale.y, 0.15f - 0.15f * targetScale.z);
         }
@@ -250,17 +266,17 @@ namespace SmolHatchling
         [HarmonyPatch(typeof(PlayerScreamingController), nameof(PlayerScreamingController.Awake))]
         public static void NPCPlayerAwake(PlayerScreamingController __instance)
         {
-            SmolHatchlingController.Instance._npcPlayer = __instance.gameObject;
+            Instance._npcPlayer = __instance.gameObject;
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerCloneController), nameof(PlayerCloneController.Start))]
         public static void EyeCloneStart(PlayerCloneController __instance)
         {
-            Vector3 playerScale = SmolHatchlingController.Instance._playerScale;
+            Vector3 playerScale = Instance._playerScale;
             float pitch;
             __instance._playerVisuals.transform.localScale = playerScale / 10;
-            if (SmolHatchlingController.Instance._pitchChangeEnabled) pitch = 0.5f * Mathf.Pow(playerScale.y, -1f) + 0.5f;
+            if (Instance._pitchChangeEnabled) pitch = 0.5f * Mathf.Pow(playerScale.y, -1f) + 0.5f;
             else pitch = 1;
             __instance._signal._owAudioSource.pitch = pitch;
         }
@@ -269,7 +285,7 @@ namespace SmolHatchling
         [HarmonyPatch(typeof(EyeMirrorController), nameof(EyeMirrorController.Start))]
         public static void EyeMirrorStart(EyeMirrorController __instance)
         {
-            Vector3 playerScale = SmolHatchlingController.Instance._playerScale;
+            Vector3 playerScale = Instance._playerScale;
             __instance._mirrorPlayer.transform.Find("Traveller_HEA_Player_v2 (2)").localScale = playerScale / 10;
         }
     }
