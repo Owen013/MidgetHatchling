@@ -14,13 +14,6 @@
       "title": "Resize Collider (A bit buggy)"
     },
 
-    "Story Mode": {
-      "type": "separator"
-    },
-    "Enable Story Mode (Requires Reload!)": true,
-    "Use Story Mode Player Adjustments": true,
-    "Enable Stools (Requires Reload!)": true,
-
     "Misc": {
       "type": "separator"
     },

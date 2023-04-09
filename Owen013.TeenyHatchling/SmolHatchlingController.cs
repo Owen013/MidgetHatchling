@@ -16,8 +16,6 @@ namespace SmolHatchling
         public float _radius;
         public float _animSpeed;
         public string _colliderMode;
-        public bool _enableStools;
-        public bool _storyEnabled;
         public bool _useStoryAttributes;
 
         // Mod vars
@@ -46,9 +44,6 @@ namespace SmolHatchling
             _autoRadius = config.GetSettingsValue<bool>("Auto-Radius");
             _colliderMode = config.GetSettingsValue<string>("Resize Collider");
             _pitchChangeEnabled = config.GetSettingsValue<bool>("Change Pitch Depending on Height");
-            _useStoryAttributes = config.GetSettingsValue<bool>("Use Story Mode Player Adjustments");
-            _enableStools = config.GetSettingsValue<bool>("Enable Stools (Requires Reload!)");
-            _storyEnabled = config.GetSettingsValue<bool>("Enable Story Mode (Requires Reload!)");
 
             UpdateTargetScale();
             UpdateStoryAttributes();
@@ -119,7 +114,7 @@ namespace SmolHatchling
             _characterLoaded = true;
             UpdateTargetScale();
             SnapSize();
-            UpdateStoryAttributes();
+            //UpdateStoryAttributes();
         }
 
         public void UpdateTargetScale()
