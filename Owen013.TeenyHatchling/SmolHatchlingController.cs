@@ -14,12 +14,14 @@ namespace SmolHatchling
         public bool _pitchChangeEnabled;
         public float _height;
         public float _radius;
-        public float _animSpeed;
         public string _colliderMode;
-        public bool _useStoryAttributes;
+        public bool _enableStools;
+        public bool _autoScaleStools;
+        public float _stoolHeight;
 
         // Mod vars
         public static SmolHatchlingController Instance;
+        public StoolController _stoolController;
         public Vector3 _targetScale, _playerScale, _colliderScale;
         public GameObject _playerModel, _playerThruster, _playerMarshmallowStick, _npcPlayer;
         public PlayerBody _playerBody;
@@ -34,19 +36,28 @@ namespace SmolHatchling
         public EyeMirrorController _mirrorController;
         public List<OWAudioSource> _playerAudio;
         public bool _characterLoaded;
+        public bool _hikersModEnabled;
+        public float _animSpeed;
+        
+        public override object GetApi()
+        {
+            return new SmolHatchlingAPI();
+        }
 
         public override void Configure(IModConfig config)
         {
             base.Configure(config);
-            _debugLogEnabled = config.GetSettingsValue<bool>("Enable Debug Log");
-            _height = config.GetSettingsValue<float>("Height %");
-            _radius = config.GetSettingsValue<float>("Radius %");
-            _autoRadius = config.GetSettingsValue<bool>("Auto-Radius");
+            _height = config.GetSettingsValue<float>("Height %") / 100f;
+            _radius = config.GetSettingsValue<float>("Radius %") / 100f;
             _colliderMode = config.GetSettingsValue<string>("Resize Collider");
             _pitchChangeEnabled = config.GetSettingsValue<bool>("Change Pitch Depending on Height");
+            _enableStools = config.GetSettingsValue<bool>("Enable Stools");
+            _autoScaleStools = config.GetSettingsValue<bool>("Auto-Adjust Stool Height");
+            _stoolHeight = config.GetSettingsValue<float>("Stool Height %") / 100f;
+            _debugLogEnabled = config.GetSettingsValue<bool>("Enable Debug Log");
 
             UpdateTargetScale();
-            UpdateStoryAttributes();
+            if (_stoolController != null) _stoolController.UpdateStoolSize();
         }
 
         public void Awake()
@@ -57,6 +68,9 @@ namespace SmolHatchling
 
         public void Start()
         {
+            // Add StoolController
+            _stoolController = gameObject.AddComponent<StoolController>();
+
             // Set characterLoaded to false at the beginning of each scene load
             LoadManager.OnStartSceneLoad += (scene, loadScene) => _characterLoaded = false;
 
@@ -95,26 +109,9 @@ namespace SmolHatchling
                 breathingAudio._drowningSource
             };
 
-            switch (LoadManager.s_currentScene)
-            {
-                // If in solar system, set these ship vars
-                case OWScene.SolarSystem:
-                    _cockpitController = FindObjectOfType<ShipCockpitController>();
-                    _logController = FindObjectOfType<ShipLogController>();
-                    break;
-                // If at eye, set clone and mirror vars
-                case OWScene.EyeOfTheUniverse:
-                    var cloneControllers = Resources.FindObjectsOfTypeAll<PlayerCloneController>();
-                    _cloneController = cloneControllers[0];
-                    var mirrorControllers = Resources.FindObjectsOfTypeAll<EyeMirrorController>();
-                    _mirrorController = mirrorControllers[0];
-                    break;
-            }
-
             _characterLoaded = true;
             UpdateTargetScale();
             SnapSize();
-            //UpdateStoryAttributes();
         }
 
         public void UpdateTargetScale()
@@ -144,20 +141,11 @@ namespace SmolHatchling
             _playerModel.transform.localPosition = new Vector3(0, -1.03f, -0.2f * _playerScale.z);
             _playerThruster.transform.localScale = _playerScale;
             _playerThruster.transform.localPosition = new Vector3(0, -1 + _playerScale.y, 0);
-            _animSpeed = Mathf.Pow(_targetScale.z, -1);
-            _animController._animator.speed = _animSpeed;
 
             // Move camera and marshmallow stick root down to match new player height
             _cameraController._origLocalPosition = new Vector3(0f, -1 + 1.8496f * _playerScale.y, 0.15f * _playerScale.z);
             _cameraController.transform.localPosition = _cameraController._origLocalPosition;
             _playerMarshmallowStick.transform.localPosition = new Vector3(0.25f, -1.8496f + 1.8496f * _playerScale.y, 0.08f - 0.15f + 0.15f * _playerScale.z);
-            
-            // Change size of Ash Twin Project player clone if it exists
-            if (_npcPlayer != null)
-            {
-                _npcPlayer.GetComponentInChildren<Animator>().gameObject.transform.localScale = _playerScale / 10;
-                _npcPlayer.transform.Find("NPC_Player_FocalPoint").localPosition = new Vector3(-0.093f, 0.991f * _targetScale.y, 0.102f);
-            }
 
             // Change pitch if enabled
             switch (_pitchChangeEnabled)
@@ -172,20 +160,51 @@ namespace SmolHatchling
                     break;
             }
 
-            switch (LoadManager.s_currentScene)
+            // Change size of Ash Twin Project player clone if it exists
+            if (_npcPlayer != null)
             {
-                // Only do these in Solar System
-                case OWScene.SolarSystem:
-                    _cockpitController._origAttachPointLocalPos = new Vector3(0, 2.1849f - 1.8496f * _playerScale.y, 4.2307f + 0.15f - 0.15f * _playerScale.z);
-                    _logController._attachPoint._attachOffset = new Vector3(0f, 1.8496f - 1.8496f * _playerScale.y, 0.15f - 0.15f * _playerScale.z);
-                    break;
-                // Only do these at the Eye
-                case OWScene.EyeOfTheUniverse:
-                    _cloneController._playerVisuals.transform.localScale = _playerScale / 10;
-                    _cloneController._signal._owAudioSource.pitch = _playerAudio[0].pitch;
-                    _mirrorController._mirrorPlayer.transform.Find("Traveller_HEA_Player_v2 (2)").localScale = _playerScale / 10;
-                    break;
+                _npcPlayer.GetComponentInChildren<Animator>().gameObject.transform.localScale = _playerScale / 10;
+                _npcPlayer.transform.Find("NPC_Player_FocalPoint").localPosition = new Vector3(-0.093f, 0.991f * _targetScale.y, 0.102f);
             }
+
+            UpdateCockpitAttachPoint();
+            UpdateLogAttachPoint();
+            UpdateEyeCloneScale();
+            UpdateMirrorCloneScale();
+
+            _animSpeed = Mathf.Pow(_targetScale.z, -1);
+            if (!_hikersModEnabled)
+            {
+                _animController._animator.speed = _animSpeed;
+                if (_cloneController != null) _cloneController._playerVisuals.GetComponent<PlayerAnimController>()._animator.speed = _animSpeed;
+                if (_mirrorController != null) _mirrorController._mirrorPlayer.GetComponentInChildren<PlayerAnimController>()._animator.speed = _animSpeed;
+            }
+        }
+
+        public void UpdateCockpitAttachPoint()
+        {
+            if (_cockpitController == null) return;
+            _cockpitController._origAttachPointLocalPos = new Vector3(0, 2.1849f - 1.8496f * _playerScale.y, 4.2307f + 0.15f - 0.15f * _playerScale.z);
+        }
+
+        public void UpdateLogAttachPoint()
+        {
+            if (_logController == null) return;
+            _logController._attachPoint._attachOffset = new Vector3(0f, 1.8496f - 1.8496f * _playerScale.y, 0.15f - 0.15f * _playerScale.z);
+        }
+
+        public void UpdateEyeCloneScale()
+        {
+            if (_cloneController == null) return;
+            _cloneController._playerVisuals.transform.localScale = _playerScale / 10;
+            _cloneController._signal._owAudioSource.pitch = _playerAudio[0].pitch;
+        }
+
+        public void UpdateMirrorCloneScale()
+        {
+            // Update mirror player scale if it exists
+            if (_mirrorController == null) return;
+            _mirrorController._mirrorPlayer.transform.Find("Traveller_HEA_Player_v2 (2)").localScale = _playerScale / 10;
         }
 
         public void UpdateColliderScale()
@@ -202,26 +221,6 @@ namespace SmolHatchling
             _playerCollider.height = _detectorCollider.height = _detectorShape.height = height;
             _playerCollider.radius = _detectorCollider.radius = _detectorShape.radius = radius;
             _playerCollider.center = _detectorCollider.center = _detectorShape.center = _playerBody._centerOfMass = _playerCollider.center = _detectorCollider.center = _playerBody._activeRigidbody.centerOfMass = center;
-        }
-
-        public void UpdateStoryAttributes()
-        {
-            if (!IsCorrectScene() || !_characterLoaded) return;
-            if (_useStoryAttributes)
-            {
-                _characterController._runSpeed = 4;
-                _characterController._strafeSpeed = 4;
-                _characterController._walkSpeed = 2;
-                _characterController._maxJumpSpeed = 5;
-
-            }
-            else
-            {
-                _characterController._runSpeed = 6;
-                _characterController._strafeSpeed = 4;
-                _characterController._walkSpeed = 3;
-                _characterController._maxJumpSpeed = 7;
-            }
         }
 
         public bool IsCorrectScene()
@@ -249,13 +248,12 @@ namespace SmolHatchling
         }
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(GhostGrabController), nameof(GhostGrabController.OnStartLiftPlayer))]
-        public static void GhostLiftedPlayer(GhostGrabController __instance)
-        {
-            Vector3 targetScale = Instance._targetScale;
-            // Offset attachment so that camera is where it normally is
-            __instance._attachPoint._attachOffset = new Vector3(0, 1.8496f - 1.8496f * targetScale.y, 0.15f - 0.15f * targetScale.z);
-        }
+        [HarmonyPatch(typeof(ShipCockpitController), nameof(ShipCockpitController.Start))]
+        public static void OnShipCockpitStart(ShipCockpitController __instance) => Instance._cockpitController = __instance;
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(ShipLogController), nameof(ShipLogController.Start))]
+        public static void OnShipLogStart(ShipLogController __instance) => Instance._logController = __instance;
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerScreamingController), nameof(PlayerScreamingController.Awake))]
@@ -266,22 +264,40 @@ namespace SmolHatchling
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerCloneController), nameof(PlayerCloneController.Start))]
-        public static void EyeCloneStart(PlayerCloneController __instance)
-        {
-            Vector3 playerScale = Instance._playerScale;
-            float pitch;
-            __instance._playerVisuals.transform.localScale = playerScale / 10;
-            if (Instance._pitchChangeEnabled) pitch = 0.5f * Mathf.Pow(playerScale.y, -1f) + 0.5f;
-            else pitch = 1;
-            __instance._signal._owAudioSource.pitch = pitch;
-        }
+        public static void EyeCloneStart(PlayerCloneController __instance) => Instance._cloneController = __instance;
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(EyeMirrorController), nameof(EyeMirrorController.Start))]
-        public static void EyeMirrorStart(EyeMirrorController __instance)
+        public static void EyeMirrorStart(EyeMirrorController __instance) => Instance._mirrorController = __instance;
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(GhostGrabController), nameof(GhostGrabController.OnStartLiftPlayer))]
+        public static void GhostLiftedPlayer(GhostGrabController __instance)
         {
-            Vector3 playerScale = Instance._playerScale;
-            __instance._mirrorPlayer.transform.Find("Traveller_HEA_Player_v2 (2)").localScale = playerScale / 10;
+            Vector3 targetScale = Instance._targetScale;
+            // Offset attachment so that camera is where it normally is
+            __instance._attachPoint._attachOffset = new Vector3(0, 1.8496f - 1.8496f * targetScale.y, 0.15f - 0.15f * targetScale.z);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(PlayerAnimController), nameof(PlayerAnimController.LateUpdate))]
+        public static void SetRunAnimFloats(PlayerAnimController __instance)
+        {
+            Vector3 vector = Vector3.zero;
+            if (!PlayerState.IsAttached())
+            {
+                vector = Instance._characterController.GetRelativeGroundVelocity();
+            }
+            if (Mathf.Abs(vector.x) < 0.05f)
+            {
+                vector.x = 0f;
+            }
+            if (Mathf.Abs(vector.z) < 0.05f)
+            {
+                vector.z = 0f;
+            }
+            __instance._animator.SetFloat("RunSpeedX", vector.x / (3f * Instance._targetScale.z));
+            __instance._animator.SetFloat("RunSpeedY", vector.z / (3f * Instance._targetScale.z));
         }
     }
 }

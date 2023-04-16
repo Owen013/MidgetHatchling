@@ -1,23 +1,59 @@
 {
+  "$schema": "https://json-schema.org/draft-07/schema",
   "enabled": true,
   "settings": {
+
     "Hatchling Size": {
       "type": "separator"
     },
-    "Height %": 0.5,
-    "Radius %": 0.7,
-    "Auto-Radius": true,
+    "Height %": {
+      "type": "number",
+      "value": 50,
+      "tooltip": "Changes the height of the player. Vanilla: 100%"
+    },
+    "Radius %": {
+      "type": "number",
+      "value": 70,
+      "tooltip": "Changes the width & length of the player. Vanilla: 100%"
+    },
     "Resize Collider": {
       "type": "selector",
       "value": "Height & Radius",
       "options": [ "Don't Resize", "Height Only", "Height & Radius" ],
-      "title": "Resize Collider (A bit buggy)"
+      "tooltip": "Resizing the player collider will allow the hatchling to fit into smaller spaces, but movement can be a tad buggy when moving against walls."
+    },
+
+    "Stools": {
+      "type": "separator"
+    },
+    "Enable Stools": {
+      "type": "toggle",
+      "value": true,
+      "tooltip": "Adds stools to the solar system to help the hatchling do things that are difficult to do when they are shorter. ENABLING/DISABLING THIS REQUIRES A RELOAD."
+    },
+    "Auto-Adjust Stool Height": {
+      "type": "toggle",
+      "value": true,
+      "tooltip": "Stools will automatically be scaled to perfectly make up the difference in player height."
+    },
+    "Stool Height %": {
+      "type": "number",
+      "value": 50,
+      "tooltip": "How tall stools will be compared to a FULL HEIGHT player. Recommended: 100 minus Player Height. DOES NOTHING IF Auto-Adjust Stool Height IS ENABLED."
     },
 
     "Misc": {
       "type": "separator"
     },
-    "Change Pitch Depending on Height": true,
-    "Enable Debug Log": false
+    "Change Pitch Depending on Height": {
+      "type": "toggle",
+      "value": true,
+      "tooltip": "The player will be higher pitched when shorter, and lower pitched when taller."
+    },
+    "Enable Debug Log": {
+      "type": "toggle",
+      "value": false,
+      "tooltip": "Prints certain events to the Outer Wilds Mod Manager console."
+    }
   }
 }
