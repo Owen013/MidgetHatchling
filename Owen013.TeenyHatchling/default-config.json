@@ -6,12 +6,12 @@
     "Hatchling Size": {
       "type": "separator"
     },
-    "Height %": {
+    "Height": {
       "type": "number",
       "value": 50,
       "tooltip": "Changes the height of the player. Vanilla: 100%"
     },
-    "Radius %": {
+    "Radius": {
       "type": "number",
       "value": 70,
       "tooltip": "Changes the width & length of the player. Vanilla: 100%"
@@ -36,7 +36,7 @@
       "value": true,
       "tooltip": "Stools will automatically be scaled to perfectly make up the difference in player height."
     },
-    "Stool Height %": {
+    "Stool Height": {
       "type": "number",
       "value": 50,
       "tooltip": "How tall stools will be compared to a FULL HEIGHT player. Recommended: 100 minus Player Height. DOES NOTHING IF Auto-Adjust Stool Height IS ENABLED."

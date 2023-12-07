@@ -4,12 +4,12 @@
     {
         public float GetAnimSpeed()
         {
-            return SmolHatchlingController.Instance._animSpeed;
+            return ModController.s_instance._animSpeed;
         }
 
         public void SetHikersModEnabled()
         {
-            SmolHatchlingController.Instance._hikersModEnabled = true;
+            ModController.s_instance._hikersModEnabled = true;
         }
     }
 }
