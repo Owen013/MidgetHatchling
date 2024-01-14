@@ -8,31 +8,33 @@ namespace SmolHatchling
 {
     public class StoolController : MonoBehaviour
     {
-        public static StoolController Instance;
-        public AssetBundle _models;
-        public List<GameObject> _stools;
-        public Material _hearthTexture, _nomaiTexture, _quantumTexture, _strangerTexture, _dreamTexture, _simTexture;
-        public string _lastHeldStool;
-        public float _stoolHeight;
+        public static StoolController s_instance;
+        private AssetBundle _models;
+        private List<GameObject> _stools;
+        private Material _hearthTexture, _nomaiTexture, _quantumTexture, _strangerTexture, _dreamTexture, _simTexture;
+        private string _lastHeldStool;
+        private float _stoolHeight;
 
-        public void Awake()
+        private void Awake()
         {
-            Instance = this;
+            s_instance = this;
             Harmony.CreateAndPatchAll(typeof(StoolController));
         }
 
-        public void Start()
+        private void Start()
         {
+            ModController.s_instance.OnUpdateScale += s_instance.UpdateStoolSize;
+
             LoadManager.OnCompleteSceneLoad += (scene, loadScene) =>
             {
                 if (_models == null) _models = ModController.s_instance.ModHelper.Assets.LoadBundle("Assets/sh_models");
                 _stools = new List<GameObject>();
-                if (!ModController.s_instance._enableStools) return;
+                if (!ModController.s_instance.enableStools) return;
                 if (loadScene == OWScene.SolarSystem) OnSolarSystemLoaded();
             };
         }
 
-        public void OnSolarSystemLoaded()
+        private void OnSolarSystemLoaded()
         {
             GameObject emberTwin = GameObject.Find("CaveTwin_Body");
             GameObject ashTwin = GameObject.Find("TowerTwin_Body");
@@ -216,7 +218,7 @@ namespace SmolHatchling
 
         }
 
-        public GameObject NewStool(Material texture)
+        private GameObject NewStool(Material texture)
         {
             GameObject stool = Instantiate(_models.LoadAsset<GameObject>("SH_Stool"));
             StoolItem stoolItem = stool.AddComponent<StoolItem>();
@@ -230,7 +232,7 @@ namespace SmolHatchling
             return stool;
         }
 
-        public GameObject NewStoolSocket()
+        private GameObject NewStoolSocket()
         {
             // Add model rocket stool socket
             GameObject socketObject = new GameObject();
@@ -246,11 +248,11 @@ namespace SmolHatchling
             return socketObject;
         }
 
-        public void PlaceObject(GameObject gameObject, GameObject parent, Vector3 localPos, Quaternion localRot)
+        private void PlaceObject(GameObject gameObject, GameObject parent, Vector3 localPos, Quaternion localRot)
         {
             if (parent == null)
             {
-                ModController.s_instance.PrintLog($"Cannot place {gameObject.name} because parent is null.");
+                ModController.s_instance.DebugLog($"Cannot place {gameObject.name} because parent is null.");
                 Destroy(gameObject);
             }
 
@@ -259,11 +261,11 @@ namespace SmolHatchling
             gameObject.transform.localRotation = localRot;
         }
 
-        public void PlaceObject(GameObject gameObject, GameObject parent, Vector3 localPos)
+        private void PlaceObject(GameObject gameObject, GameObject parent, Vector3 localPos)
         {
             if (parent == null)
             {
-                ModController.s_instance.PrintLog($"Cannot place {gameObject.name} because parent is null.");
+                ModController.s_instance.DebugLog($"Cannot place {gameObject.name} because parent is null.");
                 Destroy(gameObject);
             }
 
@@ -272,13 +274,13 @@ namespace SmolHatchling
             AutoAlignObject(gameObject);
         }
 
-        public void AutoAlignObject(GameObject gameObject)
+        private void AutoAlignObject(GameObject gameObject)
         {
             Vector3 up;
             AstroObject astroBody = gameObject.GetComponentInParent<AstroObject>();
             if (astroBody == null)
             {
-                ModController.s_instance.PrintLog($"Cannot auto-align {gameObject.name} because it is not a descendent of an AstroBody");
+                ModController.s_instance.DebugLog($"Cannot auto-align {gameObject.name} because it is not a descendent of an AstroBody");
                 return;
             }
             switch (gameObject.GetComponentInParent<AstroObject>().name)
@@ -302,19 +304,12 @@ namespace SmolHatchling
         public void UpdateStoolSize()
         {
             if (_stools == null) return;
-            if (ModController.s_instance._autoScaleStools) _stoolHeight = -ModController.s_instance._targetScale.y + 1;
-            else _stoolHeight = ModController.s_instance._stoolHeight;
+            if (ModController.s_instance.autoScaleStools) _stoolHeight = -ModController.s_instance.GetTargetScale().y + 1;
+            else _stoolHeight = ModController.s_instance.stoolHeight;
             foreach (GameObject stool in _stools)
             {
                 stool.GetComponent<StoolItem>().SetHeight(_stoolHeight);
             }
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(ModController), nameof(ModController.UpdatePlayerScale))]
-        public static void OnUpdatePlayerScale()
-        {
-            Instance.UpdateStoolSize();
         }
 
         [HarmonyPostfix]
@@ -326,7 +321,7 @@ namespace SmolHatchling
             {
                 StoolItem stool = socket.GetSocketedStoolItem();
                 float yOffset = 0f;
-                float zOffset = 0.15f - 0.15f * ModController.s_instance._targetScale.z;
+                float zOffset = 0.15f - 0.15f * ModController.s_instance.GetTargetScale().z;
                 if (stool != null) yOffset = 1.8496f * stool.GetHeight();
                 __instance.SetAttachOffset(new Vector3(0, yOffset, zOffset));
             }
@@ -337,24 +332,24 @@ namespace SmolHatchling
         [HarmonyPatch(typeof(VesselWarpController), nameof(VesselWarpController.WarpVessel))]
         public static void SaveHeldStool()
         {
-            StoolController stoolController = Instance;
+            StoolController stoolController = s_instance;
             stoolController._lastHeldStool = null;
-            if (!ModController.s_instance._characterLoaded) return;
+            //if (!ModController.s_instance._characterLoaded) return;
             foreach (GameObject stool in stoolController._stools)
             {
                 if (stool.GetComponentInParent<ItemTool>()) stoolController._lastHeldStool = stool.name;
             }
-            ModController.s_instance.PrintLog($"Saved '{stoolController._lastHeldStool}'!");
+            ModController.s_instance.DebugLog($"Saved '{stoolController._lastHeldStool}'!");
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(MemoryUplinkTrigger), nameof(MemoryUplinkTrigger.OnResumeSimulation))]
         public static void LoadHeldStool()
         {
-            StoolController stoolController = Instance;
+            StoolController stoolController = s_instance;
             if (stoolController._lastHeldStool == null) return;
             else FindObjectOfType<ItemTool>().PickUpItemInstantly(GameObject.Find(stoolController._lastHeldStool).GetComponent<OWItem>());
-            ModController.s_instance.PrintLog($"Loaded '{stoolController._lastHeldStool}'!");
+            ModController.s_instance.DebugLog($"Loaded '{stoolController._lastHeldStool}'!");
         }
     }
 }

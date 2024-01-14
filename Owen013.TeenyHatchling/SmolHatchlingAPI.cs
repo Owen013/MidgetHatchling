@@ -1,15 +1,22 @@
-﻿namespace SmolHatchling
+﻿using UnityEngine;
+
+namespace SmolHatchling
 {
     public class SmolHatchlingAPI
     {
-        public float GetAnimSpeed()
+        public Vector3 GetCurrentScale()
         {
-            return ModController.s_instance._animSpeed;
+            return ModController.s_instance.GetCurrentScale();
         }
 
-        public void SetHikersModEnabled()
+        public Vector3 GetTargetScale()
         {
-            ModController.s_instance._hikersModEnabled = true;
+            return ModController.s_instance.GetTargetScale();
+        }
+
+        public float GetAnimSpeed()
+        {
+            return ModController.s_instance.GetAnimSpeed();
         }
     }
 }
