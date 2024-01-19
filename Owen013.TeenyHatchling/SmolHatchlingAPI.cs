@@ -6,17 +6,17 @@ namespace SmolHatchling
     {
         public Vector3 GetCurrentScale()
         {
-            return ModController.s_instance.GetCurrentScale();
+            return Main.Instance.GetCurrentScale();
         }
 
         public Vector3 GetTargetScale()
         {
-            return ModController.s_instance.GetTargetScale();
+            return Main.Instance.GetTargetScale();
         }
 
         public float GetAnimSpeed()
         {
-            return ModController.s_instance.GetAnimSpeed();
+            return Main.Instance.GetAnimSpeed();
         }
     }
 }

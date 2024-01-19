@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace SmolHatchling
+namespace SmolHatchling.Components
 {
     public class StoolSocket : OWItemSocket
     {

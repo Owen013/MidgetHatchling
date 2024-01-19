@@ -6,12 +6,14 @@ using UnityEngine;
 
 namespace SmolHatchling
 {
-    public class ModController : ModBehaviour
+    public class Main : ModBehaviour
     {
-        public static ModController s_instance;
+        public static Main Instance;
         public delegate void UpdateScaleEvent();
         public event UpdateScaleEvent OnUpdateScale;
-        private StoolController _stoolController;
+        public delegate void ConfigureEvent();
+        public event UpdateScaleEvent OnConfigure;
+        private StoolManager _stoolController;
         private Vector3 _targetScale, _currentScale, _colliderScale;
         private GameObject _playerModel, _playerThruster, _playerMarshmallowStick, _npcPlayer;
         private PlayerBody _playerBody;
@@ -55,14 +57,17 @@ namespace SmolHatchling
             debugLogEnabled = config.GetSettingsValue<bool>("Enable Debug Log");
 
             UpdateTargetScale();
-            if (_stoolController != null) _stoolController.UpdateStoolSize();
+            if (OnConfigure != null)
+            {
+                OnConfigure();
+            }
         }
 
         private void Awake()
         {
-            s_instance = this;
-            _stoolController = gameObject.AddComponent<StoolController>();
-            Harmony.CreateAndPatchAll(typeof(ModController));
+            Instance = this;
+            _stoolController = gameObject.AddComponent<StoolManager>();
+            Harmony.CreateAndPatchAll(typeof(Main));
         }
 
         private void Start()
@@ -210,20 +215,20 @@ namespace SmolHatchling
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
         private static void CharacterStart(PlayerCharacterController __instance)
         {
-            s_instance._characterController = __instance;
-            s_instance._playerBody = FindObjectOfType<PlayerBody>();
-            s_instance._playerCollider = s_instance._playerBody.GetComponent<CapsuleCollider>();
-            s_instance._detectorCollider = s_instance._playerBody.transform.Find("PlayerDetector").GetComponent<CapsuleCollider>();
-            s_instance._detectorShape = s_instance._playerBody.GetComponentInChildren<CapsuleShape>();
-            s_instance._playerModel = s_instance._playerBody.transform.Find("Traveller_HEA_Player_v2").gameObject;
-            s_instance._playerThruster = s_instance._playerBody.transform.Find("PlayerVFX").gameObject;
-            s_instance._playerMarshmallowStick = s_instance._playerBody.transform.Find("RoastingSystem").transform.Find("Stick_Root").gameObject;
-            s_instance._cameraController = Locator.GetPlayerCameraController();
-            s_instance._animController = FindObjectOfType<PlayerAnimController>();
+            Instance._characterController = __instance;
+            Instance._playerBody = FindObjectOfType<PlayerBody>();
+            Instance._playerCollider = Instance._playerBody.GetComponent<CapsuleCollider>();
+            Instance._detectorCollider = Instance._playerBody.transform.Find("PlayerDetector").GetComponent<CapsuleCollider>();
+            Instance._detectorShape = Instance._playerBody.GetComponentInChildren<CapsuleShape>();
+            Instance._playerModel = Instance._playerBody.transform.Find("Traveller_HEA_Player_v2").gameObject;
+            Instance._playerThruster = Instance._playerBody.transform.Find("PlayerVFX").gameObject;
+            Instance._playerMarshmallowStick = Instance._playerBody.transform.Find("RoastingSystem").transform.Find("Stick_Root").gameObject;
+            Instance._cameraController = Locator.GetPlayerCameraController();
+            Instance._animController = FindObjectOfType<PlayerAnimController>();
             PlayerAudioController audioController = FindObjectOfType<PlayerAudioController>();
             PlayerBreathingAudio breathingAudio = FindObjectOfType<PlayerBreathingAudio>();
 
-            s_instance._playerAudio = new List<OWAudioSource>()
+            Instance._playerAudio = new List<OWAudioSource>()
             {
                 audioController._oneShotSleepingAtCampfireSource,
                 audioController._oneShotSource,
@@ -233,35 +238,35 @@ namespace SmolHatchling
                 breathingAudio._drowningSource
             };
 
-            s_instance.UpdateTargetScale();
-            s_instance.SnapSize();
+            Instance.UpdateTargetScale();
+            Instance.SnapSize();
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(ShipCockpitController), nameof(ShipCockpitController.Start))]
-        public static void OnShipCockpitStart(ShipCockpitController __instance) => s_instance._cockpitController = __instance;
+        public static void OnShipCockpitStart(ShipCockpitController __instance) => Instance._cockpitController = __instance;
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(ShipLogController), nameof(ShipLogController.Start))]
-        public static void OnShipLogStart(ShipLogController __instance) => s_instance._logController = __instance;
+        public static void OnShipLogStart(ShipLogController __instance) => Instance._logController = __instance;
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerScreamingController), nameof(PlayerScreamingController.Awake))]
-        public static void NPCPlayerAwake(PlayerScreamingController __instance) => s_instance._npcPlayer = __instance.gameObject;
+        public static void NPCPlayerAwake(PlayerScreamingController __instance) => Instance._npcPlayer = __instance.gameObject;
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerCloneController), nameof(PlayerCloneController.Start))]
-        public static void EyeCloneStart(PlayerCloneController __instance) => s_instance._cloneController = __instance;
+        public static void EyeCloneStart(PlayerCloneController __instance) => Instance._cloneController = __instance;
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(EyeMirrorController), nameof(EyeMirrorController.Start))]
-        public static void EyeMirrorStart(EyeMirrorController __instance) => s_instance._mirrorController = __instance;
+        public static void EyeMirrorStart(EyeMirrorController __instance) => Instance._mirrorController = __instance;
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(GhostGrabController), nameof(GhostGrabController.OnStartLiftPlayer))]
         public static void GhostLiftedPlayer(GhostGrabController __instance)
         {
-            Vector3 targetScale = s_instance._targetScale;
+            Vector3 targetScale = Instance._targetScale;
             // Offset attachment so that camera is where it normally is
             __instance._attachPoint._attachOffset = new Vector3(0, 1.8496f - 1.8496f * targetScale.y, 0.15f - 0.15f * targetScale.z);
         }
@@ -273,7 +278,7 @@ namespace SmolHatchling
             Vector3 vector = Vector3.zero;
             if (!PlayerState.IsAttached())
             {
-                vector = s_instance._characterController.GetRelativeGroundVelocity();
+                vector = Instance._characterController.GetRelativeGroundVelocity();
             }
             if (Mathf.Abs(vector.x) < 0.05f)
             {
@@ -283,8 +288,8 @@ namespace SmolHatchling
             {
                 vector.z = 0f;
             }
-            __instance._animator.SetFloat("RunSpeedX", vector.x / (3f * s_instance._targetScale.z));
-            __instance._animator.SetFloat("RunSpeedY", vector.z / (3f * s_instance._targetScale.z));
+            __instance._animator.SetFloat("RunSpeedX", vector.x / (3f * Instance._targetScale.z));
+            __instance._animator.SetFloat("RunSpeedY", vector.z / (3f * Instance._targetScale.z));
         }
 
         //// replacing the entire method is far from ideal, but i don't know how to transpile yet

@@ -1,36 +1,43 @@
 ﻿using HarmonyLib;
-using System;
+using SmolHatchling.Components;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 namespace SmolHatchling
 {
-    public class StoolController : MonoBehaviour
+    public class StoolManager : MonoBehaviour
     {
-        public static StoolController s_instance;
-        private AssetBundle _models;
-        private List<GameObject> _stools;
-        private Material _hearthTexture, _nomaiTexture, _quantumTexture, _strangerTexture, _dreamTexture, _simTexture;
-        private string _lastHeldStool;
-        private float _stoolHeight;
+        public static StoolManager Instance;
+        public AssetBundle models;
+        public Material hearthTexture, nomaiTexture, quantumTexture, strangerTexture, dreamTexture, simTexture;
+        private List<StoolItem> _stools;
+        private bool shouldSpawnHoldingStool;
+        private Material spawnStoolMaterial;
 
         private void Awake()
         {
-            s_instance = this;
-            Harmony.CreateAndPatchAll(typeof(StoolController));
+            Instance = this;
+            Harmony.CreateAndPatchAll(typeof(StoolManager));
         }
 
         private void Start()
         {
-            ModController.s_instance.OnUpdateScale += s_instance.UpdateStoolSize;
-
             LoadManager.OnCompleteSceneLoad += (scene, loadScene) =>
             {
-                if (_models == null) _models = ModController.s_instance.ModHelper.Assets.LoadBundle("Assets/sh_models");
-                _stools = new List<GameObject>();
-                if (!ModController.s_instance.enableStools) return;
+                if (!Main.Instance.enableStools) return;
+
+                _stools = new();
+                if (models == null)
+                {
+                    models = Main.Instance.ModHelper.Assets.LoadBundle("Assets/sh_models");
+                }
+
                 if (loadScene == OWScene.SolarSystem) OnSolarSystemLoaded();
+                if (shouldSpawnHoldingStool)
+                {
+                    Locator.GetPlayerBody().GetComponentInChildren<ItemTool>().PickUpItemInstantly(NewStool(spawnStoolMaterial).GetComponent<StoolItem>());
+                }
             };
         }
 
@@ -48,12 +55,12 @@ namespace SmolHatchling
             GameObject stranger = GameObject.Find("RingWorld_Body");
             GameObject dreamWorld = GameObject.Find("DreamWorld_Body");
 
-            _hearthTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_HEA_VillagePlanks_mat").FirstOrDefault();
-            _nomaiTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_NOM_HexagonTile_mat").FirstOrDefault();
-            _quantumTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Terrain_QM_CenterArch_mat").FirstOrDefault();
-            _strangerTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_IP_Mangrove_Wood_mat").FirstOrDefault();
-            _dreamTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_DW_Mangrove_Wood_mat").FirstOrDefault();
-            _simTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Terrain_IP_DreamGridVP_mat").FirstOrDefault();
+            hearthTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_HEA_VillagePlanks_mat").FirstOrDefault();
+            nomaiTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_NOM_HexagonTile_mat").FirstOrDefault();
+            quantumTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Terrain_QM_CenterArch_mat").FirstOrDefault();
+            strangerTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_IP_Mangrove_Wood_mat").FirstOrDefault();
+            dreamTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_DW_Mangrove_Wood_mat").FirstOrDefault();
+            simTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Terrain_IP_DreamGridVP_mat").FirstOrDefault();
 
             switch (LoadManager.s_currentScene)
             {
@@ -142,72 +149,72 @@ namespace SmolHatchling
                         Quaternion.Euler(0.0902f, 348.7343f, 0.0428f));
 
                     // Place a crap ton of stools
-                    PlaceObject(NewStool(_hearthTexture),
+                    PlaceObject(NewStool(hearthTexture),
                         timberHearth, // Village starting campsite
                         new Vector3(32.1602f, -38.3847f, 184.5434f),
                         Quaternion.Euler(357.5007f, 184.827f, 148.018f));
-                    PlaceObject(NewStool(_hearthTexture),
+                    PlaceObject(NewStool(hearthTexture),
                         timberHearth, // Village ghost matter camera
                         new Vector3(35.189f, 49.0149f, 225.9513f),
                         Quaternion.Euler(51.7721f, 82.6791f, 70.8254f));
-                    PlaceObject(NewStool(_quantumTexture),
+                    PlaceObject(NewStool(quantumTexture),
                         quantumMoon, // Solanum
                         new Vector3(-2.4616f, -68.6764f, 6.2243f));
-                    PlaceObject(NewStool(_strangerTexture),
+                    PlaceObject(NewStool(strangerTexture),
                         stranger, // River Lowlands slide player
                         new Vector3(-70.0019f, 13.0961f, -286.3849f));
-                    PlaceObject(NewStool(_strangerTexture),
+                    PlaceObject(NewStool(strangerTexture),
                         stranger, // Cinder Isles slide player
                         new Vector3(-273.9175f, -54.951f, 58.9185f));
-                    PlaceObject(NewStool(_strangerTexture),
+                    PlaceObject(NewStool(strangerTexture),
                         stranger, // Hidden Gorge Slide player
                         new Vector3(120.2041f, -70.7477f, 212.4686f));
-                    PlaceObject(NewStool(_strangerTexture),
+                    PlaceObject(NewStool(strangerTexture),
                         stranger, // Resevoir code wheel
                         new Vector3(180.4737f, 136.3092f, -153.2241f));
-                    PlaceObject(NewStool(_strangerTexture),
+                    PlaceObject(NewStool(strangerTexture),
                         stranger, // Reservoir slide player
                         new Vector3(231.4058f, 121.4653f, -40.2097f));
-                    PlaceObject(NewStool(_dreamTexture),
+                    PlaceObject(NewStool(dreamTexture),
                         dreamWorld, // Shrouded Woods tunnel door projector
                         new Vector3(58.0762f, 1.0248f, -677.8818f));
-                    PlaceObject(NewStool(_dreamTexture),
+                    PlaceObject(NewStool(dreamTexture),
                         dreamWorld, // Shrouded Woods raft projector
                         new Vector3(59.3558f, 1.1f, -752.6471f));
-                    PlaceObject(NewStool(_dreamTexture),
+                    PlaceObject(NewStool(dreamTexture),
                         dreamWorld, // Shrouded Woods bridge projector
                         new Vector3(59.3381f, 8.7338f, -607.8622f));
-                    PlaceObject(NewStool(_dreamTexture),
+                    PlaceObject(NewStool(dreamTexture),
                         dreamWorld, // Starlit Cove house projector
                         new Vector3(51.2455f, 13.7052f, -150.3283f));
-                    PlaceObject(NewStool(_dreamTexture),
+                    PlaceObject(NewStool(dreamTexture),
                         dreamWorld, // Starlit Cove lights projector
                         new Vector3(79.0349f, 25.0568f, -302.9778f));
-                    PlaceObject(NewStool(_dreamTexture),
+                    PlaceObject(NewStool(dreamTexture),
                         dreamWorld, // Endless Canyon starting bridge
                         new Vector3(14.8133f, 92.0101f, 269.9755f));
-                    PlaceObject(NewStool(_dreamTexture),
+                    PlaceObject(NewStool(dreamTexture),
                         dreamWorld, // Endless Canyon indoor bridge projector
                         new Vector3(-38.8031f, 81.15f, 222.5402f));
-                    PlaceObject(NewStool(_dreamTexture),
+                    PlaceObject(NewStool(dreamTexture),
                         dreamWorld, // Endless Canyon lights projector
                         new Vector3(24.3027f, 93.8709f, 207.3266f));
-                    PlaceObject(NewStool(_dreamTexture),
+                    PlaceObject(NewStool(dreamTexture),
                         dreamWorld, // Endless Canyon raft projector
                         new Vector3(-22.0802f, 1.16f, 273.6684f));
-                    PlaceObject(NewStool(_dreamTexture),
+                    PlaceObject(NewStool(dreamTexture),
                         dreamWorld, // Subterr Lake 1
                         new Vector3(8.796f, -290.8733f, 681.2858f),
                         Quaternion.Euler(358.46f, 180.3598f, 359.1666f));
-                    PlaceObject(NewStool(_dreamTexture),
+                    PlaceObject(NewStool(dreamTexture),
                         dreamWorld, // Subterr Lake 2
                         new Vector3(66.4256f, -290.227f, 632.392f),
                         Quaternion.Euler(355.5746f, 127.8159f, 359.0247f));
-                    PlaceObject(NewStool(_dreamTexture),
+                    PlaceObject(NewStool(dreamTexture),
                         dreamWorld, // Subterr Lake 3
                         new Vector3(-5.7661f, -294.7887f, 603.1592f),
                         Quaternion.Euler(358.9676f, 166.8059f, 357.8715f));
-                    PlaceObject(NewStool(_dreamTexture),
+                    PlaceObject(NewStool(dreamTexture),
                         dreamWorld, // Subterr Lake 4
                         new Vector3(-69.6572f, -290.137f, 630.3542f),
                         Quaternion.Euler(359.5942f, 216.7978f, 1.1301f));
@@ -220,30 +227,27 @@ namespace SmolHatchling
 
         private GameObject NewStool(Material texture)
         {
-            GameObject stool = Instantiate(_models.LoadAsset<GameObject>("SH_Stool"));
-            StoolItem stoolItem = stool.AddComponent<StoolItem>();
-            stool.name = $"SH_Stool {_stools.Count}";
-            _stools.Add(stool);
-            stoolItem._realModel.GetComponent<MeshRenderer>().material = texture;
-            stoolItem._dreamModel.GetComponent<MeshRenderer>().material = _simTexture;
-            stoolItem._dreamModel.layer = 28;
-            UpdateStoolSize();
+            GameObject stool = Instantiate(models.LoadAsset<GameObject>("SH_Stool"));
+            _stools.Add(stool.AddComponent<StoolItem>());
+            stool.name = $"Stool";
+            stool.transform.Find("Real").gameObject.GetComponent<MeshRenderer>().material = texture;
+            stool.transform.Find("Simulation").gameObject.GetComponent<MeshRenderer>().material = Instance.simTexture;
+            stool.transform.Find("Simulation").gameObject.layer = 28;
 
             return stool;
         }
 
         private GameObject NewStoolSocket()
         {
-            // Add model rocket stool socket
             GameObject socketObject = new GameObject();
             StoolSocket socketComponent = socketObject.AddComponent<StoolSocket>();
             SphereCollider sphereCollider = socketObject.AddComponent<SphereCollider>();
-            OWCollider oWCollider = socketObject.AddComponent<OWCollider>();
-            socketObject.name = "SH_StoolSocket";
+            OWCollider owCollider = socketObject.AddComponent<OWCollider>();
+            socketObject.name = "StoolSocket";
             socketComponent._socketTransform = socketObject.transform;
             sphereCollider.center = new Vector3(0, 0.5f, 0);
             sphereCollider.radius = 0.75f;
-            oWCollider.enabled = false;
+            owCollider.enabled = false;
 
             return socketObject;
         }
@@ -252,7 +256,7 @@ namespace SmolHatchling
         {
             if (parent == null)
             {
-                ModController.s_instance.DebugLog($"Cannot place {gameObject.name} because parent is null.");
+                Main.Instance.DebugLog($"Cannot place {gameObject.name} because parent is null.");
                 Destroy(gameObject);
             }
 
@@ -265,7 +269,7 @@ namespace SmolHatchling
         {
             if (parent == null)
             {
-                ModController.s_instance.DebugLog($"Cannot place {gameObject.name} because parent is null.");
+                Main.Instance.DebugLog($"Cannot place {gameObject.name} because parent is null.");
                 Destroy(gameObject);
             }
 
@@ -280,7 +284,7 @@ namespace SmolHatchling
             AstroObject astroBody = gameObject.GetComponentInParent<AstroObject>();
             if (astroBody == null)
             {
-                ModController.s_instance.DebugLog($"Cannot auto-align {gameObject.name} because it is not a descendent of an AstroBody");
+                Main.Instance.DebugLog($"Cannot auto-align {gameObject.name} because it is not a descendent of an AstroBody");
                 return;
             }
             switch (gameObject.GetComponentInParent<AstroObject>().name)
@@ -301,17 +305,6 @@ namespace SmolHatchling
             }
         }
 
-        public void UpdateStoolSize()
-        {
-            if (_stools == null) return;
-            if (ModController.s_instance.autoScaleStools) _stoolHeight = -ModController.s_instance.GetTargetScale().y + 1;
-            else _stoolHeight = ModController.s_instance.stoolHeight;
-            foreach (GameObject stool in _stools)
-            {
-                stool.GetComponent<StoolItem>().SetHeight(_stoolHeight);
-            }
-        }
-
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerAttachPoint), nameof(PlayerAttachPoint.AttachPlayer))]
         public static void PlayerToAttachPoint(PlayerAttachPoint __instance)
@@ -321,7 +314,7 @@ namespace SmolHatchling
             {
                 StoolItem stool = socket.GetSocketedStoolItem();
                 float yOffset = 0f;
-                float zOffset = 0.15f - 0.15f * ModController.s_instance.GetTargetScale().z;
+                float zOffset = 0.15f - 0.15f * Main.Instance.GetTargetScale().z;
                 if (stool != null) yOffset = 1.8496f * stool.GetHeight();
                 __instance.SetAttachOffset(new Vector3(0, yOffset, zOffset));
             }
@@ -332,24 +325,12 @@ namespace SmolHatchling
         [HarmonyPatch(typeof(VesselWarpController), nameof(VesselWarpController.WarpVessel))]
         public static void SaveHeldStool()
         {
-            StoolController stoolController = s_instance;
-            stoolController._lastHeldStool = null;
-            //if (!ModController.s_instance._characterLoaded) return;
-            foreach (GameObject stool in stoolController._stools)
+            StoolItem stool = Locator.GetPlayerBody().GetComponentInChildren<StoolItem>();
+            if (stool != null)
             {
-                if (stool.GetComponentInParent<ItemTool>()) stoolController._lastHeldStool = stool.name;
+                Instance.shouldSpawnHoldingStool = true;
+                Instance.spawnStoolMaterial = stool.GetComponent<MeshRenderer>().material;
             }
-            ModController.s_instance.DebugLog($"Saved '{stoolController._lastHeldStool}'!");
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(MemoryUplinkTrigger), nameof(MemoryUplinkTrigger.OnResumeSimulation))]
-        public static void LoadHeldStool()
-        {
-            StoolController stoolController = s_instance;
-            if (stoolController._lastHeldStool == null) return;
-            else FindObjectOfType<ItemTool>().PickUpItemInstantly(GameObject.Find(stoolController._lastHeldStool).GetComponent<OWItem>());
-            ModController.s_instance.DebugLog($"Loaded '{stoolController._lastHeldStool}'!");
         }
     }
 }
