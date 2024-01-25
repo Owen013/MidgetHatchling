@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
 using OWML.Common;
 using OWML.ModHelper;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace SmolHatchling
@@ -26,7 +25,7 @@ namespace SmolHatchling
         private ShipLogController _logController;
         private PlayerCloneController _cloneController;
         private EyeMirrorController _mirrorController;
-        private List<OWAudioSource> _playerAudio;
+        private OWAudioSource[] _audioSources;
         private float _animSpeed;
 
         // Config
@@ -120,11 +119,11 @@ namespace SmolHatchling
             {
                 case true:
                     float pitch = 0.5f * Mathf.Pow(_currentScale.y, -1) + 0.5f;
-                    foreach (OWAudioSource audio in _playerAudio) audio.pitch = pitch;
+                    foreach (OWAudioSource audio in _audioSources) audio.pitch = pitch;
                     break;
 
                 case false:
-                    foreach (OWAudioSource audio in _playerAudio) audio.pitch = 1;
+                    foreach (OWAudioSource audio in _audioSources) audio.pitch = 1;
                     break;
             }
 
@@ -164,7 +163,7 @@ namespace SmolHatchling
         {
             if (_cloneController == null) return;
             _cloneController._playerVisuals.transform.localScale = _currentScale / 10;
-            _cloneController._signal._owAudioSource.pitch = _playerAudio[0].pitch;
+            _cloneController._signal._owAudioSource.pitch = _audioSources[0].pitch;
         }
 
         private void UpdateMirrorCloneScale()
@@ -228,7 +227,7 @@ namespace SmolHatchling
             PlayerAudioController audioController = FindObjectOfType<PlayerAudioController>();
             PlayerBreathingAudio breathingAudio = FindObjectOfType<PlayerBreathingAudio>();
 
-            Instance._playerAudio = new List<OWAudioSource>()
+            Instance._audioSources = new OWAudioSource[]
             {
                 audioController._oneShotSleepingAtCampfireSource,
                 audioController._oneShotSource,
