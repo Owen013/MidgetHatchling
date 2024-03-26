@@ -1,10 +1,9 @@
 ﻿using HarmonyLib;
-using SmolHatchling.Components;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace SmolHatchling
+namespace SmolHatchling.Components
 {
     public class StoolManager : MonoBehaviour
     {
@@ -289,7 +288,7 @@ namespace SmolHatchling
             }
             switch (gameObject.GetComponentInParent<AstroObject>().name)
             {
-            default:
+                default:
                     up = astroBody.transform.InverseTransformPoint(gameObject.transform.position).normalized;
                     gameObject.transform.localRotation = Quaternion.FromToRotation(Vector3.up, up);
                     break;
