@@ -2,6 +2,7 @@
 using OWML.Common;
 using OWML.ModHelper;
 using SmolHatchling.Components;
+using SmolHatchling.Interfaces;
 using System.Reflection;
 
 namespace SmolHatchling;
@@ -9,6 +10,7 @@ namespace SmolHatchling;
 public class ModMain : ModBehaviour
 {
     public static ModMain Instance { get; private set; }
+    public IImmersion ImmersionAPI { get; private set; }
 
     public override object GetApi()
     {
@@ -32,6 +34,8 @@ public class ModMain : ModBehaviour
 
     private void Start()
     {
+        ImmersionAPI = ModHelper.Interaction.TryGetModApi<IImmersion>("Owen_013.FirstPersonPresence");
+
         LoadManager.OnCompleteSceneLoad += StoolManager.OnSceneLoaded;
         ModHelper.Console.WriteLine($"Smol Hatchling is ready to go!", MessageType.Success);
     }

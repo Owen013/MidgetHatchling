@@ -8,56 +8,47 @@ public class ScaleController : MonoBehaviour
     public Vector3 TargetScale { get; private set; }
     public float AnimSpeed { get; private set; }
 
-    private Vector3 _currentScale;
-    private Vector3 _colliderScale;
-    private GameObject _playerModel;
-    private GameObject _playerThruster;
-    private GameObject _playerMarshmallowStick;
-    private GameObject _npcPlayer;
     private PlayerBody _playerBody;
-    private PlayerCharacterController _characterController;
     private PlayerCameraController _cameraController;
     private PlayerAnimController _animController;
+    private PlayerScreamingController _npcPlayer;
+    private PlayerCloneController _cloneController;
+    private EyeMirrorController _mirrorController;
+    private ShipCockpitController _cockpitController;
+    private ShipLogController _logController;
+    private OWAudioSource[] _audioSources;
     private CapsuleCollider _playerCollider;
     private CapsuleCollider _detectorCollider;
     private CapsuleShape _detectorShape;
-    private ShipCockpitController _cockpitController;
-    private ShipLogController _logController;
-    private PlayerCloneController _cloneController;
-    private EyeMirrorController _mirrorController;
-    private OWAudioSource[] _audioSources;
+    private GameObject _playerThruster;
+    private GameObject _playerMarshmallowStick;
+    private Vector3 _currentScale;
+    private Vector3 _scaleVelocity;
+    private Vector3 _colliderScale;
 
     private void Awake()
     {
         Instance = this;
-        Config.OnConfigure += UpdateTargetScale;
-    }
-
-    private void OnDestroy()
-    {
-        Config.OnConfigure -= UpdateTargetScale;
     }
 
     private void Start()
     {
-        _characterController = GetComponent<PlayerCharacterController>();
         _playerBody = GetComponent<PlayerBody>();
+        _cameraController = Locator.GetPlayerCameraController();
+        _animController = GetComponentInChildren<PlayerAnimController>();
+        _npcPlayer = FindObjectOfType<PlayerScreamingController>();
+        _cloneController = FindObjectOfType<PlayerCloneController>();
+        _mirrorController = FindObjectOfType<EyeMirrorController>();
+        _cockpitController = FindObjectOfType<ShipCockpitController>();
+        _logController = FindObjectOfType<ShipLogController>();
         _playerCollider = GetComponent<CapsuleCollider>();
         _detectorCollider = transform.Find("PlayerDetector").GetComponent<CapsuleCollider>();
         _detectorShape = GetComponentInChildren<CapsuleShape>();
-        _playerModel = transform.Find("Traveller_HEA_Player_v2").gameObject;
         _playerThruster = transform.Find("PlayerVFX").gameObject;
         _playerMarshmallowStick = transform.Find("RoastingSystem").transform.Find("Stick_Root").gameObject;
-        _cameraController = Locator.GetPlayerCameraController();
-        _animController = GetComponentInChildren<PlayerAnimController>();
-        _cockpitController = FindObjectOfType<ShipCockpitController>();
-        _logController = FindObjectOfType<ShipLogController>();
-        _cloneController = FindObjectOfType<PlayerCloneController>();
-        _mirrorController = FindObjectOfType<EyeMirrorController>();
-        _npcPlayer = FindObjectOfType<PlayerScreamingController>()?.gameObject;
+
         PlayerAudioController audioController = GetComponentInChildren<PlayerAudioController>();
         PlayerBreathingAudio breathingAudio = GetComponentInChildren<PlayerBreathingAudio>();
-
         Instance._audioSources = new OWAudioSource[]
         {
             audioController._oneShotSleepingAtCampfireSource,
@@ -68,14 +59,23 @@ public class ScaleController : MonoBehaviour
             breathingAudio._drowningSource
         };
 
+        Config.OnConfigure += UpdateTargetScale;
         Instance.UpdateTargetScale();
         Instance.SnapSize();
     }
 
-    private void FixedUpdate()
+    private void OnDestroy()
     {
-        if (_currentScale != TargetScale) LerpSize();
-        UpdateColliderScale();
+        Config.OnConfigure -= UpdateTargetScale;
+    }
+
+    private void Update()
+    {
+        if (_currentScale != TargetScale)
+        {
+            _currentScale = Vector3.SmoothDamp(_currentScale, TargetScale, ref _scaleVelocity, 0.25f);
+            UpdatePlayerScale();
+        }
     }
 
     private void UpdateTargetScale()
@@ -89,19 +89,11 @@ public class ScaleController : MonoBehaviour
         UpdatePlayerScale();
     }
 
-    private void LerpSize()
-    {
-        _currentScale = Vector3.Lerp(_currentScale, TargetScale, 0.125f);
-        UpdatePlayerScale();
-    }
-
     private void UpdatePlayerScale()
     {
-        if (!_characterController) return;
-
         // Change playermodel size and animation speed
-        _playerModel.transform.localScale = _currentScale / 10;
-        _playerModel.transform.localPosition = new Vector3(0, -1.03f, -0.2f * _currentScale.z);
+        _animController.transform.localScale = _currentScale / 10;
+        _animController.transform.localPosition = new Vector3(0, -1.03f, -0.2f * _currentScale.z);
         _playerThruster.transform.localScale = _currentScale;
         _playerThruster.transform.localPosition = new Vector3(0, -1 + _currentScale.y, 0);
 
@@ -109,6 +101,17 @@ public class ScaleController : MonoBehaviour
         _cameraController._origLocalPosition = new Vector3(0f, -1 + 1.8496f * _currentScale.y, 0.15f * _currentScale.z);
         _cameraController.transform.localPosition = _cameraController._origLocalPosition;
         _playerMarshmallowStick.transform.localPosition = new Vector3(0.25f, -1.8496f + 1.8496f * _currentScale.y, 0.08f - 0.15f + 0.15f * _currentScale.z);
+
+        // Change collider height and radius, and move colliders down so they touch the ground
+        if (Config.ColliderMode == "Height & Radius") _colliderScale = TargetScale;
+        else if (Config.ColliderMode == "Height Only") _colliderScale = new Vector3(1, TargetScale.y, 1);
+        else _colliderScale = Vector3.one;
+        float height = 2 * _colliderScale.y;
+        float radius = Mathf.Min(_colliderScale.z / 2, height / 2);
+        Vector3 center = new Vector3(0, _colliderScale.y - 1, 0);
+        _playerCollider.height = _detectorCollider.height = _detectorShape.height = height;
+        _playerCollider.radius = _detectorCollider.radius = _detectorShape.radius = radius;
+        _playerCollider.center = _detectorCollider.center = _detectorShape.center = _playerBody._centerOfMass = _playerCollider.center = _detectorCollider.center = _playerBody._activeRigidbody.centerOfMass = center;
 
         // Change pitch if enabled
         float pitch = Config.IsPitchChangeEnabled ? 0.5f * Mathf.Pow(_currentScale.y, -1) + 0.5f : 1f;
@@ -156,21 +159,5 @@ public class ScaleController : MonoBehaviour
         // Update mirror player scale if it exists
         if (_mirrorController == null) return;
         _mirrorController._mirrorPlayer.transform.Find("Traveller_HEA_Player_v2 (2)").localScale = _currentScale / 10;
-    }
-
-    private void UpdateColliderScale()
-    {
-        if (!_characterController) return;
-
-        // Change collider height and radius, and move colliders down so they touch the ground
-        if (Config.ColliderMode == "Height & Radius") _colliderScale = TargetScale;
-        else if (Config.ColliderMode == "Height Only") _colliderScale = new Vector3(1, TargetScale.y, 1);
-        else _colliderScale = Vector3.one;
-        float height = 2 * _colliderScale.y;
-        float radius = Mathf.Min(_colliderScale.z / 2, height / 2);
-        Vector3 center = new Vector3(0, _colliderScale.y - 1, 0);
-        _playerCollider.height = _detectorCollider.height = _detectorShape.height = height;
-        _playerCollider.radius = _detectorCollider.radius = _detectorShape.radius = radius;
-        _playerCollider.center = _detectorCollider.center = _detectorShape.center = _playerBody._centerOfMass = _playerCollider.center = _detectorCollider.center = _playerBody._activeRigidbody.centerOfMass = center;
     }
 }
