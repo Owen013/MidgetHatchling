@@ -15,6 +15,13 @@ public static class Patches
     }
 
     [HarmonyPostfix]
+    [HarmonyPatch(typeof(PlayerAnimController), nameof(PlayerAnimController.Start))]
+    public static void AnimControllerStart(PlayerCharacterController __instance)
+    {
+        __instance.gameObject.AddComponent<PlayerModelController>();
+    }
+
+    [HarmonyPostfix]
     [HarmonyPatch(typeof(GhostGrabController), nameof(GhostGrabController.OnStartLiftPlayer))]
     public static void GhostLiftedPlayer(GhostGrabController __instance)
     {

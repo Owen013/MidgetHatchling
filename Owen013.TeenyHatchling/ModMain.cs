@@ -10,6 +10,7 @@ public class ModMain : ModBehaviour
 {
     public static ModMain Instance { get; private set; }
     public IImmersion ImmersionAPI { get; private set; }
+    public bool IsHikersModInstalled { get; private set; }
 
     public override object GetApi()
     {
@@ -34,6 +35,7 @@ public class ModMain : ModBehaviour
     private void Start()
     {
         ImmersionAPI = ModHelper.Interaction.TryGetModApi<IImmersion>("Owen_013.FirstPersonPresence");
+        IsHikersModInstalled = ModHelper.Interaction.ModExists("Owen013.MovementMod");
 
         LoadManager.OnCompleteSceneLoad += StoolManager.OnSceneLoaded;
         ModHelper.Console.WriteLine($"Smol Hatchling is ready to go!", MessageType.Success);

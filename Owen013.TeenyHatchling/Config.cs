@@ -27,13 +27,13 @@ public static class Config
         PlayerHeight = heightSetting;
 
         float radiusSetting = config.GetSettingsValue<float>("Radius");
-        if (heightSetting == 0f)
+        if (radiusSetting == 0f)
         {
             ModMain.Instance.WriteLine("Player radius cannot be 0.", MessageType.Warning);
-            config.SetSettingsValue("Height", 1f);
+            config.SetSettingsValue("Radius", 1f);
             radiusSetting = 1f;
         }
-        PlayerRadius = heightSetting;
+        PlayerRadius = radiusSetting;
 
         ColliderMode = config.GetSettingsValue<string>("Resize Collider");
         IsPitchChangeEnabled = config.GetSettingsValue<bool>("Change Pitch Depending on Height");
