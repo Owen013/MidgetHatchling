@@ -18,7 +18,7 @@ public class PlayerModelController : MonoBehaviour
     private void LateUpdate()
     {
         transform.localScale = ScaleController.Instance.CurrentScale * 0.1f;
-        transform.localPosition = new Vector3(0, -1.03f, -0.2f * ScaleController.Instance.CurrentScale.z);
+        transform.localPosition = new Vector3(0, -1.03f, -0.2f * ScaleController.Instance.CurrentScale.x);
 
         AnimSpeed = 1f / ScaleController.Instance.TargetScale.z;
 

@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using SmolHatchling.Components;
-using Steamworks;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -137,10 +136,15 @@ public static class StoolManager
         GameObject giantsDeep = GameObject.Find("GiantsDeep_Body");
         GameObject darkBramble = GameObject.Find("DarkBramble_Body");
         GameObject quantumMoon = GameObject.Find("QuantumMoon_Body");
+        GameObject stranger = GameObject.Find("RingWorld_Body");
+        GameObject dreamWorld = GameObject.Find("DreamWorld_Body");
 
         hearthTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_HEA_VillagePlanks_mat").FirstOrDefault();
         nomaiTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_NOM_HexagonTile_mat").FirstOrDefault();
         quantumTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Terrain_QM_CenterArch_mat").FirstOrDefault();
+        strangerTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_IP_Mangrove_Wood_mat").FirstOrDefault();
+        dreamTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_DW_Mangrove_Wood_mat").FirstOrDefault();
+        simTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Terrain_IP_DreamGridDesaturated_mat").FirstOrDefault();
 
         // Place stool sockets
         PlaceObject(NewStoolSocket(), GameObject.Find("ModelRocketStation_AttachPoint"), new Vector3(0.0054f, -1.0032f, -0.0627f), Quaternion.identity); // Village model rocket
@@ -148,19 +152,13 @@ public static class StoolManager
         PlaceObject(NewStoolSocket(), GameObject.Find("TutorialProbeLauncher_Base/InteractZone"), new Vector3(-0.0496f, -1.0474f, -0.3875f), Quaternion.identity); // Village scout launcher
 
         // Place stools
-        PlaceObject(NewStool(hearthTexture), timberHearth, new Vector3(32.1602f, -38.3847f, 184.5434f), Quaternion.Euler(357.5007f, 184.827f, 148.018f)); // Village starting campsite
+        PlaceObject(NewStool(hearthTexture), timberHearth, new Vector3(35.4122f, -42.4175f, 183.0197f), Quaternion.Euler(324.3938f, 92.9075f, 21.2698f)); // Village starting campsite
         PlaceObject(NewStool(hearthTexture), timberHearth, new Vector3(35.189f, 49.0149f, 225.9513f), Quaternion.Euler(51.7721f, 82.6791f, 70.8254f)); // Village ghost matter camera
         PlaceObject(NewStool(quantumTexture), quantumMoon, new Vector3(-2.4616f, -68.6764f, 6.2243f)); // Solanum
 
         // if DLC is owned...
         if (EntitlementsManager.IsDlcOwned() == EntitlementsManager.AsyncOwnershipStatus.Owned)
         {
-            GameObject stranger = GameObject.Find("RingWorld_Body");
-            strangerTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_IP_Mangrove_Wood_mat").FirstOrDefault();
-            GameObject dreamWorld = GameObject.Find("DreamWorld_Body");
-            dreamTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_DW_Mangrove_Wood_mat").FirstOrDefault();
-            simTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Terrain_IP_DreamGridVP_mat").FirstOrDefault();
-
             PlaceObject(NewStoolSocket(), stranger, new Vector3(-68.3667f, 12.9691f, -286.7644f), Quaternion.Euler(55.6455f, 283.0649f, 269.9998f)); // River Lowlands slide player
             PlaceObject(NewStoolSocket(), stranger, new Vector3(-276.8384f, -48.6267f, 59.6053f), Quaternion.Euler(302.8642f, 12.068f, 270f)); // Cinder Isles slide player
             PlaceObject(NewStoolSocket(), stranger, new Vector3(124.4978f, -70.4448f, 209.9373f), Quaternion.Euler(11.7714f, 300.5211f, 90f)); // Hidden Gorge slide player

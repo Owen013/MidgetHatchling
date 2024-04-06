@@ -7,6 +7,7 @@ public static class Config
     public static float PlayerHeight { get; private set; }
     public static float PlayerRadius { get; private set; }
     public static string ColliderMode { get; private set; }
+    //public static bool UseScaledPlayerAttributes { get; private set; }
     public static bool IsPitchChangeEnabled { get; private set; }
     public static bool IsStoolsEnabled { get; private set; }
     public static bool AutoScaleStools { get; private set; }
@@ -36,6 +37,7 @@ public static class Config
         PlayerRadius = radiusSetting;
 
         ColliderMode = config.GetSettingsValue<string>("Resize Collider");
+        //UseScaledPlayerAttributes = config.GetSettingsValue<bool>("ScalePlayerAttributes");
         IsPitchChangeEnabled = config.GetSettingsValue<bool>("Change Pitch Depending on Height");
         IsStoolsEnabled = config.GetSettingsValue<bool>("Enable Stools");
         AutoScaleStools = config.GetSettingsValue<bool>("Auto-Adjust Stool Height");

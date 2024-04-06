@@ -13,7 +13,7 @@
     },
     "Radius": {
       "type": "number",
-      "value": 0.75,
+      "value": 0.5,
       "tooltip": "Changes the width & length of the player. Vanilla: 1"
     },
     "Resize Collider": {

@@ -1,5 +1,4 @@
 ﻿using SmolHatchling.Components;
-using System;
 using UnityEngine;
 
 namespace SmolHatchling;
@@ -20,4 +19,9 @@ public class SmolHatchlingAPI
     {
         return PlayerModelController.AnimSpeed;
     }
+
+    //public bool ScalePlayerAttributes()
+    //{
+    //    return Config.UseScaledPlayerAttributes;
+    //}
 }

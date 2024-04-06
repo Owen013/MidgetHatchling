@@ -7,7 +7,9 @@ public class ScaleController : MonoBehaviour
     public static ScaleController Instance { get; private set; }
     public Vector3 TargetScale { get; private set; }
     public Vector3 CurrentScale { get; private set; }
+
     private PlayerBody _playerBody;
+    private PlayerCharacterController _characterController;
     private PlayerCameraController _cameraController;
     private PlayerScreamingController _npcPlayer;
     private PlayerCloneController _cloneController;
@@ -30,6 +32,7 @@ public class ScaleController : MonoBehaviour
     private void Start()
     {
         _playerBody = GetComponent<PlayerBody>();
+        _characterController = GetComponent<PlayerCharacterController>();
         _cameraController = Locator.GetPlayerCameraController();
         _npcPlayer = FindObjectOfType<PlayerScreamingController>();
         _cloneController = FindObjectOfType<PlayerCloneController>();
@@ -43,7 +46,7 @@ public class ScaleController : MonoBehaviour
 
         PlayerAudioController audioController = GetComponentInChildren<PlayerAudioController>();
         PlayerBreathingAudio breathingAudio = GetComponentInChildren<PlayerBreathingAudio>();
-        Instance._audioSources = new OWAudioSource[]
+        _audioSources = new OWAudioSource[]
         {
             audioController._oneShotSleepingAtCampfireSource,
             audioController._oneShotSource,
@@ -54,7 +57,7 @@ public class ScaleController : MonoBehaviour
         };
 
         Config.OnConfigure += UpdateTargetScale;
-        Instance.UpdateTargetScale();
+        UpdateTargetScale();
 
         CurrentScale = TargetScale;
         UpdatePlayerScale();
@@ -77,6 +80,17 @@ public class ScaleController : MonoBehaviour
     private void UpdateTargetScale()
     {
         TargetScale = new Vector3(Config.PlayerRadius, Config.PlayerHeight, Config.PlayerRadius);
+        _cameraController._playerCamera.nearClipPlane = 0.1f * Mathf.Min(TargetScale.x, TargetScale.y);
+        //if (!ModMain.Instance.IsHikersModInstalled)
+        //{
+        //    _characterController._runSpeed = 6f * TargetScale.x;
+        //    _characterController._strafeSpeed = 4f * TargetScale.x;
+        //    _characterController._walkSpeed = 3f * TargetScale.x;
+        //    _characterController._acceleration = 0.5f * TargetScale.x;
+        //    _characterController._airAcceleration = 0.09f * TargetScale.x;
+        //    _characterController._minJumpSpeed = 3f * TargetScale.y;
+        //    _characterController._maxJumpSpeed = 7f * TargetScale.y;
+        //}
     }
 
     private void UpdatePlayerScale()
