@@ -9,7 +9,7 @@ public static class Patches
 {
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Awake))]
-    public static void GhostLiftedPlayer(PlayerCharacterController __instance)
+    public static void CharacterControllerAwake(PlayerCharacterController __instance)
     {
         __instance.gameObject.AddComponent<ScaleController>();
     }

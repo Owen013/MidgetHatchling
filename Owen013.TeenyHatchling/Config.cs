@@ -17,8 +17,24 @@ public static class Config
 
     public static void UpdateConfig(IModConfig config)
     {
-        PlayerHeight = config.GetSettingsValue<float>("Height");
-        PlayerRadius = config.GetSettingsValue<float>("Radius");
+        float heightSetting = config.GetSettingsValue<float>("Height");
+        if (heightSetting == 0f)
+        {
+            ModMain.Instance.WriteLine("Player height cannot be 0.", MessageType.Warning);
+            config.SetSettingsValue("Height", 1f);
+            heightSetting = 1f;
+        }
+        PlayerHeight = heightSetting;
+
+        float radiusSetting = config.GetSettingsValue<float>("Radius");
+        if (heightSetting == 0f)
+        {
+            ModMain.Instance.WriteLine("Player radius cannot be 0.", MessageType.Warning);
+            config.SetSettingsValue("Height", 1f);
+            radiusSetting = 1f;
+        }
+        PlayerRadius = heightSetting;
+
         ColliderMode = config.GetSettingsValue<string>("Resize Collider");
         IsPitchChangeEnabled = config.GetSettingsValue<bool>("Change Pitch Depending on Height");
         IsStoolsEnabled = config.GetSettingsValue<bool>("Enable Stools");
