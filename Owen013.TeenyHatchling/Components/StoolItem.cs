@@ -22,6 +22,7 @@ public class StoolItem : OWItem
         _type = (ItemType)256;
 
         Config.OnConfigure += UpdateHeight;
+        UpdateHeight();
 
         base.Awake();
     }

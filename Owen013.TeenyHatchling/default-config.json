@@ -20,7 +20,7 @@
       "type": "selector",
       "value": "Height & Radius",
       "options": [ "Don't Resize", "Height Only", "Height & Radius" ],
-      "tooltip": "Resizing the player collider will allow the hatchling to fit into smaller spaces, but movement can be a tad buggy when moving against walls."
+      "tooltip": "Resizing the player collider will allow the hatchling to fit into smaller spaces, but movement can be a tad buggy when moving against walls. Recommended: Height Only"
     },
 
     "Stools": {
@@ -49,11 +49,6 @@
       "type": "toggle",
       "value": true,
       "tooltip": "The player will be higher pitched when shorter, and lower pitched when taller."
-    },
-    "Enable Debug Log": {
-      "type": "toggle",
-      "value": false,
-      "tooltip": "Prints certain events to the Outer Wilds Mod Manager console."
     }
   }
 }
