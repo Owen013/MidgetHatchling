@@ -21,8 +21,7 @@ public class StoolItem : OWItem
         _collider = GetComponent<BoxCollider>();
         _type = (ItemType)256;
 
-        Main.Instance.OnUpdateScale += UpdateHeight;
-        Main.Instance.OnConfigure += UpdateHeight;
+        Config.OnConfigure += UpdateHeight;
 
         base.Awake();
     }
@@ -30,8 +29,7 @@ public class StoolItem : OWItem
     public override void OnDestroy()
     {
         base.OnDestroy();
-        Main.Instance.OnUpdateScale -= UpdateHeight;
-        Main.Instance.OnConfigure -= UpdateHeight;
+        Config.OnConfigure -= UpdateHeight;
     }
 
     public override void DropItem(Vector3 position, Vector3 normal, Transform parent, Sector sector, IItemDropTarget customDropTarget)
@@ -62,8 +60,8 @@ public class StoolItem : OWItem
 
     private void UpdateHeight()
     {
-        if (Main.Instance.autoScaleStools) _height = -Main.Instance.GetTargetScale().y + 1;
-        else _height = Main.Instance.stoolHeight;
+        if (Config.AutoScaleStools) _height = -ScaleController.Instance.TargetScale.y + 1;
+        else _height = Config.StoolHeight;
 
         Vector3 stoolScale = new Vector3(0.5f, _height, 0.5f);
 

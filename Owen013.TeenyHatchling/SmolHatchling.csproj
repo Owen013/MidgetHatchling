@@ -28,11 +28,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="Build\**" />
-    <EmbeddedResource Remove="Build\**" />
-    <None Remove="Build\**" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="SmolHatchling.csproj.user" />
   </ItemGroup>
   <ProjectExtensions><VisualStudio><UserProperties default-config_1json__JsonSchema="https://json-schema.org/draft-07/schema" /></VisualStudio></ProjectExtensions>

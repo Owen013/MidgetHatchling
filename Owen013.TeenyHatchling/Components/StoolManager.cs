@@ -24,7 +24,7 @@ namespace SmolHatchling.Components
         {
             LoadManager.OnCompleteSceneLoad += (scene, loadScene) =>
             {
-                if (!Main.Instance.enableStools) return;
+                if (!Config.IsStoolsEnabled) return;
 
                 _stools = new();
                 if (models == null)
@@ -32,7 +32,10 @@ namespace SmolHatchling.Components
                     models = Main.Instance.ModHelper.Assets.LoadBundle("Assets/sh_models");
                 }
 
-                if (loadScene == OWScene.SolarSystem) OnSolarSystemLoaded();
+                if (loadScene == OWScene.SolarSystem)
+                {
+                    OnSolarSystemLoaded();
+                }
                 if (shouldSpawnHoldingStool)
                 {
                     Locator.GetPlayerBody().GetComponentInChildren<ItemTool>().PickUpItemInstantly(NewStool(spawnStoolMaterial).GetComponent<StoolItem>());
@@ -255,7 +258,7 @@ namespace SmolHatchling.Components
         {
             if (parent == null)
             {
-                Main.Instance.DebugLog($"Cannot place {gameObject.name} because parent is null.");
+                Main.Instance.WriteLine($"Cannot place {gameObject.name} because parent is null.");
                 Destroy(gameObject);
             }
 
@@ -268,7 +271,7 @@ namespace SmolHatchling.Components
         {
             if (parent == null)
             {
-                Main.Instance.DebugLog($"Cannot place {gameObject.name} because parent is null.");
+                Main.Instance.WriteLine($"Cannot place {gameObject.name} because parent is null.");
                 Destroy(gameObject);
             }
 
@@ -283,7 +286,7 @@ namespace SmolHatchling.Components
             AstroObject astroBody = gameObject.GetComponentInParent<AstroObject>();
             if (astroBody == null)
             {
-                Main.Instance.DebugLog($"Cannot auto-align {gameObject.name} because it is not a descendent of an AstroBody");
+                Main.Instance.WriteLine($"Cannot auto-align {gameObject.name} because it is not a descendent of an AstroBody");
                 return;
             }
             switch (gameObject.GetComponentInParent<AstroObject>().name)
@@ -313,7 +316,7 @@ namespace SmolHatchling.Components
             {
                 StoolItem stool = socket.GetSocketedStoolItem();
                 float yOffset = 0f;
-                float zOffset = 0.15f - 0.15f * Main.Instance.GetTargetScale().z;
+                float zOffset = 0.15f - 0.15f * ScaleController.Instance.TargetScale.z;
                 if (stool != null) yOffset = 1.8496f * stool.GetHeight();
                 __instance.SetAttachOffset(new Vector3(0, yOffset, zOffset));
             }
