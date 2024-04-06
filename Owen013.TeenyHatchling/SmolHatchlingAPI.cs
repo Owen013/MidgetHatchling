@@ -18,6 +18,6 @@ public class SmolHatchlingAPI
 
     public float GetAnimSpeed()
     {
-        return ScaleController.Instance.AnimSpeed;
+        return PlayerModelController.AnimSpeed;
     }
 }

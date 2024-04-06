@@ -7,8 +7,6 @@ public class ScaleController : MonoBehaviour
     public static ScaleController Instance { get; private set; }
     public Vector3 TargetScale { get; private set; }
     public Vector3 CurrentScale { get; private set; }
-    public float AnimSpeed { get; private set; }
-
     private PlayerBody _playerBody;
     private PlayerCameraController _cameraController;
     private PlayerScreamingController _npcPlayer;
@@ -83,8 +81,6 @@ public class ScaleController : MonoBehaviour
 
     private void UpdatePlayerScale()
     {
-        AnimSpeed = Mathf.Pow(TargetScale.z, -1);
-
         // Move camera and marshmallow stick root down to match new player height
         _cameraController._origLocalPosition = new Vector3(0f, -1 + 1.8496f * CurrentScale.y, 0.15f * CurrentScale.z);
         _cameraController.transform.localPosition = _cameraController._origLocalPosition;
