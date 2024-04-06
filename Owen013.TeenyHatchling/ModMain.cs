@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
 using OWML.Common;
 using OWML.ModHelper;
-using SmolHatchling.Components;
 using SmolHatchling.Interfaces;
 using System.Reflection;
 
