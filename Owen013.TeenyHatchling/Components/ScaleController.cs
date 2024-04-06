@@ -7,11 +7,8 @@ public class ScaleController : MonoBehaviour
     public static ScaleController Instance { get; private set; }
     public Vector3 TargetScale { get; private set; }
     public Vector3 CurrentScale { get; private set; }
-
-    public delegate void UpdateScaleEvent();
-    public event UpdateScaleEvent OnUpdateScale;
-
     public float AnimSpeed { get; private set; }
+
     private PlayerBody _playerBody;
     private PlayerCameraController _cameraController;
     private PlayerScreamingController _npcPlayer;
@@ -60,7 +57,9 @@ public class ScaleController : MonoBehaviour
 
         Config.OnConfigure += UpdateTargetScale;
         Instance.UpdateTargetScale();
-        Instance.SnapSize();
+
+        CurrentScale = TargetScale;
+        UpdatePlayerScale();
     }
 
     private void OnDestroy()
@@ -80,17 +79,12 @@ public class ScaleController : MonoBehaviour
     private void UpdateTargetScale()
     {
         TargetScale = new Vector3(Config.PlayerRadius, Config.PlayerHeight, Config.PlayerRadius);
-        OnUpdateScale?.Invoke();
-    }
-
-    private void SnapSize()
-    {
-        CurrentScale = TargetScale;
-        UpdatePlayerScale();
     }
 
     private void UpdatePlayerScale()
     {
+        AnimSpeed = Mathf.Pow(TargetScale.z, -1);
+
         // Move camera and marshmallow stick root down to match new player height
         _cameraController._origLocalPosition = new Vector3(0f, -1 + 1.8496f * CurrentScale.y, 0.15f * CurrentScale.z);
         _cameraController.transform.localPosition = _cameraController._origLocalPosition;
@@ -122,31 +116,27 @@ public class ScaleController : MonoBehaviour
 
         // Change pitch if enabled
         float pitch = Config.IsPitchChangeEnabled ? 0.5f * Mathf.Pow(CurrentScale.y, -1) + 0.5f : 1f;
-        foreach (OWAudioSource audio in _audioSources) audio.pitch = pitch;
+        foreach (OWAudioSource audio in _audioSources)
+        {
+            audio.pitch = pitch;
+        }
 
-        // Change size of Ash Twin Project player clone if it exists
         if (_npcPlayer != null)
         {
             _npcPlayer.GetComponentInChildren<Animator>().transform.localScale = CurrentScale / 10;
             _npcPlayer.transform.Find("NPC_Player_FocalPoint").localPosition = new Vector3(-0.093f, 0.991f * TargetScale.y, 0.102f);
         }
-
-        UpdateCockpitAttachPoint();
-        UpdateLogAttachPoint();
-        _cloneController._signal._owAudioSource.pitch = _audioSources[0].pitch;
-
-        AnimSpeed = Mathf.Pow(TargetScale.z, -1);
-    }
-
-    private void UpdateCockpitAttachPoint()
-    {
-        if (_cockpitController == null) return;
-        _cockpitController._origAttachPointLocalPos = new Vector3(0, 2.1849f - 1.8496f * CurrentScale.y, 4.2307f + 0.15f - 0.15f * CurrentScale.z);
-    }
-
-    private void UpdateLogAttachPoint()
-    {
-        if (_logController == null) return;
-        _logController._attachPoint._attachOffset = new Vector3(0f, 1.8496f - 1.8496f * CurrentScale.y, 0.15f - 0.15f * CurrentScale.z);
+        if (_cloneController != null)
+        {
+            _cloneController._signal._owAudioSource.pitch = _audioSources[0].pitch;
+        }
+        if (_cockpitController != null)
+        {
+            _cockpitController._origAttachPointLocalPos = new Vector3(0, 2.1849f - 1.8496f * CurrentScale.y, 4.2307f + 0.15f - 0.15f * CurrentScale.z);
+        }
+        if (_logController != null)
+        {
+            _logController._attachPoint._attachOffset = new Vector3(0f, 1.8496f - 1.8496f * CurrentScale.y, 0.15f - 0.15f * CurrentScale.z);
+        }
     }
 }

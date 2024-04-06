@@ -6,15 +6,14 @@ namespace SmolHatchling;
 
 public class SmolHatchlingAPI
 {
-    [Obsolete("Deprecated; use GetTargetScale() instead")]
-    public Vector3 GetCurrentScale()
+    public Vector3 GetTargetScale()
     {
         return ScaleController.Instance.TargetScale;
     }
 
-    public Vector3 GetTargetScale()
+    public Vector3 GetCurrentScale()
     {
-        return ScaleController.Instance.TargetScale;
+        return ScaleController.Instance.CurrentScale;
     }
 
     public float GetAnimSpeed()
