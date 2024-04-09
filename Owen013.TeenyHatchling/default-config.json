@@ -13,8 +13,8 @@
     },
     "Width Factor": {
       "type": "number",
-      "value": 0.5,
-      "tooltip": "Changes the width & length of the player. Vanilla: 1"
+      "value": 1,
+      "tooltip": "Changes the width of the player compared to their height. Vanilla: 1"
     },
     "Resize Collider": {
       "type": "selector",
@@ -44,7 +44,7 @@
     "Stool Height": {
       "type": "number",
       "value": 0.5,
-      "tooltip": "How tall stools will be compared to a FULL HEIGHT player. Recommended: 1 - 'Height'. DOES NOTHING IF Auto-Adjust Stool Height IS ENABLED."
+      "tooltip": "How tall stools will be compared to a FULL HEIGHT player. DOES NOTHING IF Auto-Adjust Stool Height IS ENABLED."
     },
 
     "Misc": {
