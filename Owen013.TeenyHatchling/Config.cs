@@ -4,10 +4,10 @@ namespace SmolHatchling;
 
 public static class Config
 {
-    public static float PlayerHeight { get; private set; }
-    public static float PlayerRadius { get; private set; }
+    public static float PlayerScale { get; private set; }
+    public static float PlayerWidthFactor { get; private set; }
     public static string ColliderMode { get; private set; }
-    //public static bool UseScaledPlayerAttributes { get; private set; }
+    public static bool UseScaledPlayerAttributes { get; private set; }
     public static bool IsPitchChangeEnabled { get; private set; }
     public static bool IsStoolsEnabled { get; private set; }
     public static bool AutoScaleStools { get; private set; }
@@ -18,26 +18,26 @@ public static class Config
 
     public static void UpdateConfig(IModConfig config)
     {
-        float heightSetting = config.GetSettingsValue<float>("Height");
+        float heightSetting = config.GetSettingsValue<float>("Player Scale");
         if (heightSetting == 0f)
         {
             ModMain.Instance.WriteLine("Player height cannot be 0.", MessageType.Warning);
-            config.SetSettingsValue("Height", 1f);
+            config.SetSettingsValue("Player Scale", 1f);
             heightSetting = 1f;
         }
-        PlayerHeight = heightSetting;
+        PlayerScale = heightSetting;
 
-        float radiusSetting = config.GetSettingsValue<float>("Radius");
+        float radiusSetting = config.GetSettingsValue<float>("Width Factor");
         if (radiusSetting == 0f)
         {
             ModMain.Instance.WriteLine("Player radius cannot be 0.", MessageType.Warning);
-            config.SetSettingsValue("Radius", 1f);
+            config.SetSettingsValue("Width Factor", 1f);
             radiusSetting = 1f;
         }
-        PlayerRadius = radiusSetting;
+        PlayerWidthFactor = radiusSetting;
 
         ColliderMode = config.GetSettingsValue<string>("Resize Collider");
-        //UseScaledPlayerAttributes = config.GetSettingsValue<bool>("ScalePlayerAttributes");
+        UseScaledPlayerAttributes = config.GetSettingsValue<bool>("Use Scaled Player Attributes");
         IsPitchChangeEnabled = config.GetSettingsValue<bool>("Change Pitch Depending on Height");
         IsStoolsEnabled = config.GetSettingsValue<bool>("Enable Stools");
         AutoScaleStools = config.GetSettingsValue<bool>("Auto-Adjust Stool Height");

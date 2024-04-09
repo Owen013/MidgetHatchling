@@ -19,7 +19,7 @@ public class ScaleController : MonoBehaviour
     private CapsuleCollider _playerCollider;
     private CapsuleCollider _detectorCollider;
     private CapsuleShape _detectorShape;
-    private GameObject _playerMarshmallowStick;
+    private GameObject _marshmallowStick;
     private GameObject _playerThruster;
     private Vector3 _scaleVelocity;
     private Vector3 _colliderScale;
@@ -41,7 +41,7 @@ public class ScaleController : MonoBehaviour
         _playerCollider = GetComponent<CapsuleCollider>();
         _detectorCollider = transform.Find("PlayerDetector").GetComponent<CapsuleCollider>();
         _detectorShape = GetComponentInChildren<CapsuleShape>();
-        _playerMarshmallowStick = transform.Find("RoastingSystem").transform.Find("Stick_Root").gameObject;
+        _marshmallowStick = transform.Find("RoastingSystem").transform.Find("Stick_Root").gameObject;
         _playerThruster = transform.Find("PlayerVFX").gameObject;
 
         PlayerAudioController audioController = GetComponentInChildren<PlayerAudioController>();
@@ -79,26 +79,45 @@ public class ScaleController : MonoBehaviour
 
     private void UpdateTargetScale()
     {
-        TargetScale = new Vector3(Config.PlayerRadius, Config.PlayerHeight, Config.PlayerRadius);
-        _cameraController._playerCamera.nearClipPlane = 0.1f * Mathf.Min(TargetScale.x, TargetScale.y);
-        //if (!ModMain.Instance.IsHikersModInstalled)
-        //{
-        //    _characterController._runSpeed = 6f * TargetScale.x;
-        //    _characterController._strafeSpeed = 4f * TargetScale.x;
-        //    _characterController._walkSpeed = 3f * TargetScale.x;
-        //    _characterController._acceleration = 0.5f * TargetScale.x;
-        //    _characterController._airAcceleration = 0.09f * TargetScale.x;
-        //    _characterController._minJumpSpeed = 3f * TargetScale.y;
-        //    _characterController._maxJumpSpeed = 7f * TargetScale.y;
-        //}
+        TargetScale = new Vector3(Config.PlayerScale * Config.PlayerWidthFactor, Config.PlayerScale, Config.PlayerScale * Config.PlayerWidthFactor);
+        _cameraController._playerCamera.nearClipPlane = 0.1f * Mathf.Min(TargetScale.x, TargetScale.y, 1f);
+        if (ModMain.Instance.HikersModAPI != null)
+        {
+            ModMain.Instance.HikersModAPI.UpdateConfig();
+        }
+        else
+        {
+            if (Config.UseScaledPlayerAttributes)
+            {
+                _characterController._runSpeed = 6f * TargetScale.x;
+                _characterController._strafeSpeed = 4f * TargetScale.x;
+                _characterController._walkSpeed = 3f * TargetScale.x;
+                _characterController._airSpeed = 3f * TargetScale.x;
+                _characterController._acceleration = 0.5f * TargetScale.x;
+                _characterController._airAcceleration = 0.09f * TargetScale.x;
+                _characterController._minJumpSpeed = 3f * Mathf.Sqrt(TargetScale.y);
+                _characterController._maxJumpSpeed = 7f * Mathf.Sqrt(TargetScale.y);
+            }
+            else
+            {
+                _characterController._runSpeed = 6f;
+                _characterController._strafeSpeed = 4f;
+                _characterController._walkSpeed = 3f;
+                _characterController._airSpeed = 3f;
+                _characterController._acceleration = 0.5f;
+                _characterController._airAcceleration = 0.09f;
+                _characterController._minJumpSpeed = 3f;
+                _characterController._maxJumpSpeed = 7f;
+            }
+        }
     }
 
     private void UpdatePlayerScale()
     {
         // Move camera and marshmallow stick root down to match new player height
-        _cameraController._origLocalPosition = new Vector3(0f, -1 + 1.8496f * CurrentScale.y, 0.15f * CurrentScale.z);
+        _cameraController._origLocalPosition = new Vector3(0f, -1 + 1.8496f * CurrentScale.y, 0.15f * CurrentScale.x);
         _cameraController.transform.localPosition = _cameraController._origLocalPosition;
-        _playerMarshmallowStick.transform.localPosition = new Vector3(0.25f, -1.8496f + 1.8496f * CurrentScale.y, 0.08f - 0.15f + 0.15f * CurrentScale.z);
+        _marshmallowStick.transform.localPosition = new Vector3(0.25f, -1.8496f + 1.8496f * CurrentScale.y, 0.08f - 0.15f + 0.15f * CurrentScale.x);
 
         // move jetpack flames
         _playerThruster.transform.localScale = CurrentScale;
@@ -118,7 +137,7 @@ public class ScaleController : MonoBehaviour
             _colliderScale = Vector3.one;
         }
         float height = 2 * _colliderScale.y;
-        float radius = Mathf.Min(0.5f * _colliderScale.z, 0.5f * height);
+        float radius = Mathf.Min(0.5f * _colliderScale.x, 0.5f * height);
         Vector3 center = new Vector3(0f, _colliderScale.y - 1f, 0f);
         _playerCollider.height = _detectorCollider.height = _detectorShape.height = height;
         _playerCollider.radius = _detectorCollider.radius = _detectorShape.radius = radius;
@@ -142,11 +161,11 @@ public class ScaleController : MonoBehaviour
         }
         if (_cockpitController != null)
         {
-            _cockpitController._origAttachPointLocalPos = new Vector3(0, 2.1849f - 1.8496f * CurrentScale.y, 4.2307f + 0.15f - 0.15f * CurrentScale.z);
+            _cockpitController._origAttachPointLocalPos = new Vector3(0, 2.1849f - 1.8496f * CurrentScale.y, 4.2307f + 0.15f - 0.15f * CurrentScale.x);
         }
         if (_logController != null)
         {
-            _logController._attachPoint._attachOffset = new Vector3(0f, 1.8496f - 1.8496f * CurrentScale.y, 0.15f - 0.15f * CurrentScale.z);
+            _logController._attachPoint._attachOffset = new Vector3(0f, 1.8496f - 1.8496f * CurrentScale.y, 0.15f - 0.15f * CurrentScale.x);
         }
     }
 }

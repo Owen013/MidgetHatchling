@@ -10,7 +10,7 @@ public class ModMain : ModBehaviour
 {
     public static ModMain Instance { get; private set; }
     public IImmersion ImmersionAPI { get; private set; }
-    public bool IsHikersModInstalled { get; private set; }
+    public IHikersMod HikersModAPI { get; private set; }
 
     public override object GetApi()
     {
@@ -35,9 +35,14 @@ public class ModMain : ModBehaviour
     private void Start()
     {
         ImmersionAPI = ModHelper.Interaction.TryGetModApi<IImmersion>("Owen_013.FirstPersonPresence");
-        IsHikersModInstalled = ModHelper.Interaction.ModExists("Owen013.MovementMod");
+        HikersModAPI = ModHelper.Interaction.TryGetModApi<IHikersMod>("Owen013.MovementMod");
 
-        LoadManager.OnCompleteSceneLoad += StoolManager.OnSceneLoaded;
+        if (HikersModAPI == null)
+        {
+            ModHelper.HarmonyHelper.AddPrefix<DreamLanternItem>("OverrideMaxRunSpeed", typeof(Patches), nameof(Patches.OverrideMaxRunSpeed));
+        }
+
+        LoadManager.OnCompleteSceneLoad += (_, loadScene) => StoolManager.OnSceneLoaded(loadScene);
         ModHelper.Console.WriteLine($"Smol Hatchling is ready to go!", MessageType.Success);
     }
 }

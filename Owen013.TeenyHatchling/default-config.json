@@ -6,12 +6,12 @@
     "Hatchling Size": {
       "type": "separator"
     },
-    "Height": {
+    "Player Scale": {
       "type": "number",
       "value": 0.5,
       "tooltip": "Changes the height of the player. Vanilla: 1"
     },
-    "Radius": {
+    "Width Factor": {
       "type": "number",
       "value": 0.5,
       "tooltip": "Changes the width & length of the player. Vanilla: 1"
@@ -21,6 +21,11 @@
       "value": "Height Only",
       "options": [ "Don't Resize", "Height Only", "Height & Radius" ],
       "tooltip": "Resizing the player collider will allow the hatchling to fit into smaller spaces, but movement can be a tad buggy when moving against walls. Recommended: Height Only"
+    },
+    "Use Scaled Player Attributes": {
+      "type": "toggle",
+      "value": true,
+      "tooltip": "Changes the player's movement attributes based on their size. Smaller players will run slower and jump lower, while larger ones will do the opposite. Recommended: Enabled"
     },
 
     "Stools": {

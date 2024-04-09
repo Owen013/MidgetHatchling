@@ -7,6 +7,17 @@ namespace SmolHatchling;
 [HarmonyPatch]
 public static class Patches
 {
+    // this one is manually added if Hiker's Mod is not installed
+    public static bool OverrideMaxRunSpeed(ref float maxSpeedX, ref float maxSpeedZ, DreamLanternItem __instance)
+    {
+        if (!Config.UseScaledPlayerAttributes) return true;
+        float lerpPosition = 1f - __instance._lanternController.GetFocus();
+        lerpPosition *= lerpPosition;
+        maxSpeedX = Mathf.Lerp(2f * ScaleController.Instance.TargetScale.x, maxSpeedX, lerpPosition);
+        maxSpeedZ = Mathf.Lerp(2f * ScaleController.Instance.TargetScale.x, maxSpeedZ, lerpPosition);
+        return false;
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Awake))]
     public static void CharacterControllerAwake(PlayerCharacterController __instance)
@@ -47,7 +58,7 @@ public static class Patches
         {
             vector.z = 0f;
         }
-        __instance._animator.SetFloat("RunSpeedX", vector.x / (3f * ScaleController.Instance.TargetScale.z));
-        __instance._animator.SetFloat("RunSpeedY", vector.z / (3f * ScaleController.Instance.TargetScale.z));
+        __instance._animator.SetFloat("RunSpeedX", vector.x / (3f * ScaleController.Instance.TargetScale.x));
+        __instance._animator.SetFloat("RunSpeedY", vector.z / (3f * ScaleController.Instance.TargetScale.x));
     }
 }

@@ -17,8 +17,6 @@ public static class StoolManager
     private static Material strangerTexture;
     private static Material dreamTexture;
     private static Material simTexture;
-    private static Material spawnStoolMaterial;
-    private static bool shouldSpawnHoldingStool;
 
     public static GameObject NewStool(Material texture)
     {
@@ -29,10 +27,7 @@ public static class StoolManager
         stool.transform.Find("Simulation").gameObject.GetComponent<MeshRenderer>().material = simTexture;
         stool.transform.Find("Simulation").gameObject.layer = 28;
 
-        if (ModMain.Instance.ImmersionAPI != null)
-        {
-            ModMain.Instance.ImmersionAPI.NewViewmodelArm(stool.transform.Find("Real"), new Vector3(0.5684f, 0.2515f, -0.8578f), Quaternion.Euler(336.7634f, 0f, 0.9158f), new Vector3(2f, 2f, 2f));
-        }
+        ModMain.Instance.ImmersionAPI?.NewViewmodelArm(stool.transform.Find("Real"), new Vector3(0.5684f, 0.2515f, -0.8578f), Quaternion.Euler(336.7634f, 0f, 0.9158f), new Vector3(2f, 2f, 2f));
 
         return stool;
     }
@@ -105,7 +100,7 @@ public static class StoolManager
         }
     }
 
-    internal static void OnSceneLoaded(OWScene scene, OWScene loadScene)
+    internal static void OnSceneLoaded(OWScene loadScene)
     {
         if (!Config.IsStoolsEnabled) return;
 
@@ -118,10 +113,6 @@ public static class StoolManager
         if (loadScene == OWScene.SolarSystem)
         {
             OnSolarSystemLoaded();
-        }
-        if (shouldSpawnHoldingStool)
-        {
-            Locator.GetPlayerBody().GetComponentInChildren<ItemTool>().PickUpItemInstantly(NewStool(spawnStoolMaterial).GetComponent<StoolItem>());
         }
     }
 
@@ -144,7 +135,7 @@ public static class StoolManager
         quantumTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Terrain_QM_CenterArch_mat").FirstOrDefault();
         strangerTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_IP_Mangrove_Wood_mat").FirstOrDefault();
         dreamTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Structure_DW_Mangrove_Wood_mat").FirstOrDefault();
-        simTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Terrain_IP_DreamGridDesaturated_mat").FirstOrDefault();
+        simTexture = Resources.FindObjectsOfTypeAll<Material>().Where((x) => x.name == "Terrain_IP_DreamGrid_mat").FirstOrDefault();
 
         // Place stool sockets
         PlaceObject(NewStoolSocket(), GameObject.Find("ModelRocketStation_AttachPoint"), new Vector3(0.0054f, -1.0032f, -0.0627f), Quaternion.identity); // Village model rocket
@@ -208,22 +199,9 @@ public static class StoolManager
         {
             StoolItem stool = socket.GetSocketedStoolItem();
             float yOffset = 0f;
-            float zOffset = 0.15f - 0.15f * ScaleController.Instance.TargetScale.z;
+            float zOffset = 0.15f - 0.15f * ScaleController.Instance.TargetScale.x;
             if (stool != null) yOffset = 1.8496f * stool.GetHeight();
             __instance.SetAttachOffset(new Vector3(0, yOffset, zOffset));
-        }
-    }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(MemoryUplinkTrigger), nameof(MemoryUplinkTrigger.BeginUplinkSequence))]
-    [HarmonyPatch(typeof(VesselWarpController), nameof(VesselWarpController.WarpVessel))]
-    private static void SaveHeldStool()
-    {
-        StoolItem stool = Locator.GetPlayerBody().GetComponentInChildren<StoolItem>();
-        if (stool != null)
-        {
-            shouldSpawnHoldingStool = true;
-            spawnStoolMaterial = stool.GetComponent<MeshRenderer>().material;
         }
     }
 }
