@@ -7,6 +7,7 @@ public class PlayerModelController : MonoBehaviour
     public static float AnimSpeed { get; private set; }
 
     private PlayerCharacterController _characterController;
+
     private PlayerAnimController _animController;
 
     private void Start()

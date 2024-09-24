@@ -5,23 +5,39 @@ namespace SmolHatchling.Components;
 public class ScaleController : MonoBehaviour
 {
     public static ScaleController Instance { get; private set; }
+
     public Vector3 TargetScale { get; private set; }
+
     public Vector3 CurrentScale { get; private set; }
 
     private PlayerBody _playerBody;
+
     private PlayerCharacterController _characterController;
+
     private PlayerCameraController _cameraController;
+
     private PlayerScreamingController _npcPlayer;
+
     private PlayerCloneController _cloneController;
+
     private ShipCockpitController _cockpitController;
+
     private ShipLogController _logController;
+
     private OWAudioSource[] _audioSources;
+
     private CapsuleCollider _playerCollider;
+
     private CapsuleCollider _detectorCollider;
+
     private CapsuleShape _detectorShape;
+
     private GameObject _marshmallowStick;
+
     private GameObject _playerThruster;
+
     private Vector3 _scaleVelocity;
+
     private Vector3 _colliderScale;
 
     private void Awake()

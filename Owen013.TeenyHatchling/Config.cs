@@ -5,15 +5,23 @@ namespace SmolHatchling;
 public static class Config
 {
     public static float PlayerScale { get; private set; }
+
     public static float PlayerWidthFactor { get; private set; }
+
     public static string ColliderMode { get; private set; }
+
     public static bool UseScaledPlayerAttributes { get; private set; }
+
     public static bool IsPitchChangeEnabled { get; private set; }
+
     public static bool IsStoolsEnabled { get; private set; }
+
     public static bool AutoScaleStools { get; private set; }
+
     public static float StoolHeight { get; private set; }
 
     public delegate void ConfigureEvent();
+
     public static event ConfigureEvent OnConfigure;
 
     public static void UpdateConfig(IModConfig config)

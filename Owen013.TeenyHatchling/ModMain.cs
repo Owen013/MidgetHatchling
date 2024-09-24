@@ -9,7 +9,9 @@ namespace SmolHatchling;
 public class ModMain : ModBehaviour
 {
     public static ModMain Instance { get; private set; }
+
     public IImmersion ImmersionAPI { get; private set; }
+
     public IHikersMod HikersModAPI { get; private set; }
 
     public override object GetApi()

@@ -11,6 +11,7 @@ public static class Patches
     public static bool OverrideMaxRunSpeed(ref float maxSpeedX, ref float maxSpeedZ, DreamLanternItem __instance)
     {
         if (!Config.UseScaledPlayerAttributes) return true;
+
         float lerpPosition = 1f - __instance._lanternController.GetFocus();
         lerpPosition *= lerpPosition;
         maxSpeedX = Mathf.Lerp(2f * ScaleController.Instance.TargetScale.x, maxSpeedX, lerpPosition);
@@ -50,10 +51,12 @@ public static class Patches
         {
             vector = Locator.GetPlayerController().GetRelativeGroundVelocity();
         }
+
         if (Mathf.Abs(vector.x) < 0.05f)
         {
             vector.x = 0f;
         }
+
         if (Mathf.Abs(vector.z) < 0.05f)
         {
             vector.z = 0f;

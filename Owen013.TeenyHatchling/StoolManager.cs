@@ -10,12 +10,19 @@ namespace SmolHatchling;
 public static class StoolManager
 {
     private static AssetBundle models;
+
     private static List<StoolItem> _stools;
+
     private static Material hearthTexture;
+
     private static Material nomaiTexture;
+
     private static Material quantumTexture;
+
     private static Material strangerTexture;
+
     private static Material dreamTexture;
+
     private static Material simTexture;
 
     public static GameObject NewStool(Material texture)
@@ -100,7 +107,7 @@ public static class StoolManager
         }
     }
 
-    internal static void OnSceneLoaded(OWScene loadScene)
+    public static void OnSceneLoaded(OWScene loadScene)
     {
         if (!Config.IsStoolsEnabled) return;
 

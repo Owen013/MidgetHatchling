@@ -5,8 +5,11 @@ namespace SmolHatchling.Components;
 public class StoolItem : OWItem
 {
     private GameObject _realModel;
+
     private GameObject _dreamModel;
+
     private BoxCollider _collider;
+
     float _height;
 
     public override string GetDisplayName()
