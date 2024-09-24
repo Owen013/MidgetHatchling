@@ -3,57 +3,22 @@
   "enabled": true,
   "settings": {
 
-    "Hatchling Size": {
-      "type": "separator"
-    },
     "Player Scale": {
-      "type": "number",
-      "value": 0.5,
-      "tooltip": "Changes the height of the player. Vanilla: 1"
-    },
-    "Width Factor": {
-      "type": "number",
-      "value": 1,
-      "tooltip": "Changes the width of the player compared to their height. Vanilla: 1"
-    },
-    "Resize Collider": {
-      "type": "selector",
-      "value": "Height Only",
-      "options": [ "Don't Resize", "Height Only", "Height & Radius" ],
-      "tooltip": "Resizing the player collider will allow the hatchling to fit into smaller spaces, but movement can be a tad buggy when moving against walls. Recommended: Height Only"
-    },
-    "Use Scaled Player Attributes": {
-      "type": "toggle",
-      "value": true,
-      "tooltip": "Changes the player's movement attributes based on their size. Smaller players will run slower and jump lower, while larger ones will do the opposite. Recommended: Enabled"
-    },
-
-    "Stools": {
+      "title": "Player Scale",
       "type": "separator"
     },
-    "Enable Stools": {
+    "UseCustomPlayerScale": {
+      "title": "Use Custom Player Scale",
+      "tooltip": "Overrides the Player Scale to the value below.",
       "type": "toggle",
-      "value": true,
-      "tooltip": "Adds stools to the solar system to help the hatchling do things that are difficult to do when they are shorter. ENABLING/DISABLING THIS REQUIRES A RELOAD."
+      "value": false
     },
-    "Auto-Adjust Stool Height": {
-      "type": "toggle",
-      "value": true,
-      "tooltip": "Stools will automatically be scaled to perfectly make up the difference in player height."
-    },
-    "Stool Height": {
+    "PlayerScale": {
+      "title": "Player Scale Multiplier",
+      "tooltip": "Changes the size of the player.",
       "type": "number",
-      "value": 0.5,
-      "tooltip": "How tall stools will be compared to a FULL HEIGHT player. DOES NOTHING IF Auto-Adjust Stool Height IS ENABLED."
-    },
-
-    "Misc": {
-      "type": "separator"
-    },
-    "Change Pitch Depending on Height": {
-      "type": "toggle",
-      "value": true,
-      "tooltip": "The player will be higher pitched when shorter, and lower pitched when taller."
+      "value": 1
     }
+
   }
 }
