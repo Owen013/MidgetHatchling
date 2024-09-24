@@ -8,12 +8,12 @@ public class ScaleController : MonoBehaviour
     {
         get
         {
-            return gameObject.transform.localScale.x;
+            return transform.localScale.x;
         }
 
         set
         {
-            gameObject.transform.localScale = Vector3.one * value;
+            transform.localScale = Vector3.one * value;
         }
     }
 }

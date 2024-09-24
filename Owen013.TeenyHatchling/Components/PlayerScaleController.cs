@@ -8,11 +8,13 @@ public class PlayerScaleController : ScaleController
 {
     public static PlayerScaleController Instance { get; private set; }
 
+    public static float animSpeed { get; private set; }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.CastForGrounded))]
     private static bool PlayerCharacterController_CastForGrounded(PlayerCharacterController __instance)
     {
-        if (!ModMain.Instance.GetConfigSetting<bool>("UseCustomPlayerScale") || ModMain.Instance.GetConfigSetting<float>("PlayerScale") == 1) return true;
+        if (ModMain.Instance.GetConfigSetting<float>("PlayerScale") == 1) return true;
 
         float num = Time.fixedDeltaTime * 60f;
         bool flag = __instance._fluidDetector.InFluidType(FluidVolume.Type.TRACTOR_BEAM) || __instance._fluidDetector.InFluidType(FluidVolume.Type.SAND) || __instance._fluidDetector.InFluidType(FluidVolume.Type.WATER);
@@ -196,6 +198,21 @@ public class PlayerScaleController : ScaleController
         }
 
         Locator.GetPlayerCamera().nearClipPlane = 0.1f * scale;
+    }
+
+    private void LateUpdate()
+    {
+        animSpeed = 1f / Instance.scale;
+
+        // yield to Hiker's Mod or Immersion if they are installed
+        if (!ModMain.Instance.ModHelper.Interaction.ModExists("Owen013.MovementMod"))
+        {
+            animSpeed = Mathf.Max(Mathf.Sqrt(Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude * animSpeed / 6f), 1f);
+            if (!ModMain.Instance.ModHelper.Interaction.ModExists("Owen_013.FirstPersonPresence"))
+            {
+                Locator.GetPlayerController().GetComponentInChildren<Animator>().speed = animSpeed;
+            }
+        }
     }
 }
 
