@@ -6,29 +6,7 @@ namespace SmolHatchling.Components;
 [HarmonyPatch]
 public class PlayerScaleController : ScaleController
 {
-    public override Vector3 scale
-    {
-        get
-        {
-            return gameObject.transform.localScale;
-        }
-
-        set
-        {
-            gameObject.transform.localScale = Vector3.one * value.y;
-            if (value.x != value.y || value.z != value.y)
-            {
-                ModMain.Instance.Print($"The x, y, and z scale of the Player_Body must be the same. Player scale has been set to {gameObject.transform.localScale}", OWML.Common.MessageType.Error);
-            }
-        }
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(PlayerBody), nameof(PlayerBody.Awake))]
-    private static void AddToPlayerBody(PlayerBody __instance)
-    {
-        __instance.gameObject.AddComponent<PlayerScaleController>();
-    }
+    public static PlayerScaleController Instance { get; private set; }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.CastForGrounded))]
@@ -43,7 +21,7 @@ public class PlayerScaleController : ScaleController
         Vector3 localUpDirection = __instance._owRigidbody.GetLocalUpDirection();
         float num3 = 0.46f;
         float maxDistance = num2 + (1f - num3);
-        float scale = __instance.GetComponent<PlayerScaleController>().scale.y;
+        float scale = __instance.GetComponent<PlayerScaleController>().scale;
         int num4 = Physics.SphereCastNonAlloc(__instance._owRigidbody.GetPosition(), num3 * scale, -localUpDirection, __instance._raycastHits, maxDistance * scale, OWLayerMask.groundMask, QueryTriggerInteraction.Ignore);
         RaycastHit raycastHit = default(RaycastHit);
         bool flag3 = false;
@@ -167,14 +145,57 @@ public class PlayerScaleController : ScaleController
         return false;
     }
 
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PlayerBody), nameof(PlayerBody.Awake))]
+    private static void AddToPlayerBody(PlayerBody __instance)
+    {
+        __instance.gameObject.AddComponent<PlayerScaleController>();
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(GhostGrabController), nameof(GhostGrabController.OnStartLiftPlayer))]
+    public static void GhostLiftedPlayer(GhostGrabController __instance)
+    {
+        // Offset attachment so that camera is where it normally is
+        __instance._attachPoint._attachOffset = new Vector3(0, 0.8496f * (1 - Instance.scale), 0.15f * (1 - Instance.scale));
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PlayerAnimController), nameof(PlayerAnimController.LateUpdate))]
+    public static void SetRunAnimFloats(PlayerAnimController __instance)
+    {
+        Vector3 vector = Vector3.zero;
+        if (!PlayerState.IsAttached())
+        {
+            vector = Locator.GetPlayerController().GetRelativeGroundVelocity();
+        }
+
+        if (Mathf.Abs(vector.x) < 0.05f)
+        {
+            vector.x = 0f;
+        }
+
+        if (Mathf.Abs(vector.z) < 0.05f)
+        {
+            vector.z = 0f;
+        }
+        __instance._animator.SetFloat("RunSpeedX", vector.x / (3f * Instance.scale));
+        __instance._animator.SetFloat("RunSpeedY", vector.z / (3f * Instance.scale));
+    }
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     private void Update()
     {
         if (ModMain.Instance.GetConfigSetting<bool>("UseCustomPlayerScale"))
         {
-            scale = Vector3.one * ModMain.Instance.GetConfigSetting<float>("PlayerScale");
+            scale = ModMain.Instance.GetConfigSetting<float>("PlayerScale");
         }
 
-        Locator.GetPlayerCamera().nearClipPlane = 0.1f * scale.y;
+        Locator.GetPlayerCamera().nearClipPlane = 0.1f * scale;
     }
 }
 

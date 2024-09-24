@@ -4,16 +4,16 @@ namespace SmolHatchling.Components;
 
 public class ScaleController : MonoBehaviour
 {
-    public virtual Vector3 scale
+    public virtual float scale
     {
         get
         {
-            return gameObject.transform.localScale;
+            return gameObject.transform.localScale.x;
         }
 
         set
         {
-            gameObject.transform.localScale = value;
+            gameObject.transform.localScale = Vector3.one * value;
         }
     }
 }
