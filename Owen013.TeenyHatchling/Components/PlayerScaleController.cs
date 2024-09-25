@@ -230,6 +230,8 @@ public class PlayerScaleController : ScaleController
                 scaleController.Scale = ModMain.Instance.GetConfigSetting<float>("PlayerScale");
                 __instance.transform.position += __instance.GetLocalUpDirection() * (-1 + 1 * scaleController.Scale);
             }
+
+            ModMain.HikersModAPI?.UpdateConfig();
         });
     }
 
@@ -293,10 +295,12 @@ public class PlayerScaleController : ScaleController
         if (ModMain.Instance.GetConfigSetting<bool>("UseCustomPlayerScale"))
         {
             targetScale = ModMain.Instance.GetConfigSetting<float>("PlayerScale");
+            Locator.GetPlayerCamera().nearClipPlane = Mathf.Min(0.1f, 0.1f * Scale);
 
             PlayerCharacterController player = GetComponent<PlayerCharacterController>();
             JetpackThrusterModel jetpack = GetComponent<JetpackThrusterModel>();
-            if (ModMain.Instance.GetConfigSetting<bool>("UseScaledPlayerAttributes") && Scale != 1)
+            if (ModMain.HikersModAPI != null) return;
+            else if (ModMain.Instance.GetConfigSetting<bool>("UseScaledPlayerAttributes") && Scale != 1)
             {
                 player._runSpeed = 6 * Scale;
                 player._strafeSpeed = 4 * Scale;
@@ -319,8 +323,6 @@ public class PlayerScaleController : ScaleController
                 player._maxJumpSpeed = 7;
             }
         }
-
-        Locator.GetPlayerCamera().nearClipPlane = Mathf.Min(0.1f, 0.1f * Scale);
     }
 
     private void FixedUpdate()
@@ -333,12 +335,14 @@ public class PlayerScaleController : ScaleController
 
     private void LateUpdate()
     {
-        AnimSpeed = Mathf.Max(Mathf.Sqrt(Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude * (1f / Instance.Scale) / 6f), 1f);
-
-        // yield to Hiker's Mod or Immersion if they are installed
-        if (!ModMain.Instance.ModHelper.Interaction.ModExists("Owen013.MovementMod") && !ModMain.Instance.ModHelper.Interaction.ModExists("Owen_013.FirstPersonPresence"))
+        AnimSpeed = 1f / Instance.Scale;
+        if (ModMain.HikersModAPI == null)
         {
-            Locator.GetPlayerController().GetComponentInChildren<Animator>().speed = AnimSpeed;
+            AnimSpeed = Mathf.Max(Mathf.Sqrt(Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude * AnimSpeed / 6f), 1f);
+            if (!ModMain.Instance.ModHelper.Interaction.ModExists("Owen_013.FirstPersonPresence"))
+            {
+                Locator.GetPlayerController().GetComponentInChildren<Animator>().speed = AnimSpeed;
+            }
         }
     }
 }
@@ -349,5 +353,6 @@ public class PlayerScaleController : ScaleController
  *  - player jump curve slowdown doesn't scale
  *  - camera is in wrong place in most attach points
  *  - flashlight distance doesn't scale
+ *  - freefall anim floats probably don't scale
  *  
  */

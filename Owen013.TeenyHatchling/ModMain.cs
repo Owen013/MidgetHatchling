@@ -2,6 +2,7 @@
 using OWML.Common;
 using OWML.ModHelper;
 using ScaleManipulator.Components;
+using ScaleManipulator.Interfaces;
 using System.Reflection;
 
 namespace ScaleManipulator;
@@ -9,6 +10,8 @@ namespace ScaleManipulator;
 public class ModMain : ModBehaviour
 {
     public static ModMain Instance { get; private set; }
+
+    public static IHikersMod HikersModAPI { get; private set; }
 
     public override object GetApi()
     {
@@ -18,6 +21,10 @@ public class ModMain : ModBehaviour
     public override void Configure(IModConfig config)
     {
         base.Configure(config);
+        ModHelper.Events.Unity.FireOnNextUpdate(() =>
+        {
+            HikersModAPI?.UpdateConfig();
+        });
     }
 
     public T GetConfigSetting<T>(string settingName)
@@ -38,6 +45,8 @@ public class ModMain : ModBehaviour
 
     private void Start()
     {
+        HikersModAPI = ModHelper.Interaction.TryGetModApi<IHikersMod>("Owen013.MovementMod");
+
         if (ModHelper.Interaction.ModExists("Owen013.MovementMod"))
         {
             ModHelper.HarmonyHelper.AddPrefix<DreamLanternItem>(nameof(DreamLanternItem.OverrideMaxRunSpeed), typeof(PlayerScaleController), nameof(PlayerScaleController.OverrideMaxRunSpeed));
