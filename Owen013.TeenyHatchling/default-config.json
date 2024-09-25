@@ -20,7 +20,7 @@
       "value": 1
     },
     "UseScaledPlayerAttributes": {
-      "title": "Change player attributes ",
+      "title": "Change player attributes",
       "tooltip": "Changes the speed, jump height, and acceleration of the player to match its size.",
       "type": "toggle",
       "value": true

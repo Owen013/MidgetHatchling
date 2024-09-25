@@ -1,8 +1,7 @@
-﻿using Epic.OnlineServices;
-using HarmonyLib;
+﻿using HarmonyLib;
 using UnityEngine;
 
-namespace SmolHatchling.Components;
+namespace ScaleManipulator.Components;
 
 [HarmonyPatch]
 public class PlayerScaleController : ScaleController
@@ -10,6 +9,21 @@ public class PlayerScaleController : ScaleController
     public static PlayerScaleController Instance { get; private set; }
 
     public static float AnimSpeed { get; private set; }
+
+    public override float Scale
+    {
+        get
+        {
+            return transform.localScale.x;
+        }
+        set
+        {
+            transform.localScale = Vector3.one * value;
+            targetScale = value;
+        }
+    }
+
+    public float targetScale;
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.CastForGrounded))]
@@ -54,47 +68,41 @@ public class PlayerScaleController : ScaleController
             }
             else
             {
-                for (int j = 0; j < numSphereCastHits; j++)
+                for (int i = 0; i < numSphereCastHits; i++)
                 {
-                    if (__instance.IsValidGroundedHit(__instance._raycastHits[j]) && __instance.AllowGroundedOnRigidbody(__instance._raycastHits[j].rigidbody))
+                    if (__instance.IsValidGroundedHit(__instance._raycastHits[i]) && __instance.AllowGroundedOnRigidbody(__instance._raycastHits[i].rigidbody))
                     {
-                        float groundHitDistance = __instance.GetGroundHitDistance(__instance._raycastHits[j]);
+                        float groundHitDistance = __instance.GetGroundHitDistance(__instance._raycastHits[i]);
                         groundDistance = Mathf.Min(groundDistance, groundHitDistance);
-                        if (Vector3.Angle(localUpDirection, __instance._raycastHits[j].normal) <= (float)__instance._maxAngleToBeGrounded)
+                        if (Vector3.Angle(localUpDirection, __instance._raycastHits[i].normal) <= (float)__instance._maxAngleToBeGrounded)
                         {
-                            raycastHit = __instance._raycastHits[j];
+                            raycastHit = __instance._raycastHits[i];
                             canBecomeGrounded = true;
                         }
                         else
                         {
-                            __instance._raycastHitNormals[j] = Vector3.ProjectOnPlane(__instance._raycastHits[j].normal, localUpDirection);
+                            __instance._raycastHitNormals[i] = Vector3.ProjectOnPlane(__instance._raycastHits[i].normal, localUpDirection);
                         }
                     }
                 }
 
                 if (!canBecomeGrounded)
                 {
-                    int raycastHitNum = 0;
-                    while (raycastHitNum < numSphereCastHits && !__instance._isGrounded)
+                    for (int i = 0; i < numSphereCastHits && !__instance._isGrounded; i++)
                     {
-                        if (__instance.IsValidGroundedHit(__instance._raycastHits[raycastHitNum]))
+                        if (__instance.IsValidGroundedHit(__instance._raycastHits[i]))
                         {
-                            int num7 = raycastHitNum + 1;
-                            while (num7 < numSphereCastHits && !__instance._isGrounded)
+                            for (int j = i + 1; j < numSphereCastHits && !__instance._isGrounded; j++)
                             {
-                                if (__instance.IsValidGroundedHit(__instance._raycastHits[raycastHitNum]) && Vector3.Angle(__instance._raycastHitNormals[raycastHitNum], __instance._raycastHitNormals[num7]) > (float)__instance._maxAngleBetweenSlopes)
+                                if (__instance.IsValidGroundedHit(__instance._raycastHits[i]) && Vector3.Angle(__instance._raycastHitNormals[i], __instance._raycastHitNormals[j]) > (float)__instance._maxAngleBetweenSlopes)
                                 {
                                     canBecomeGrounded = true;
-                                    raycastHit = __instance._raycastHits[raycastHitNum];
-                                    groundDistance = __instance.GetGroundHitDistance(__instance._raycastHits[raycastHitNum]);
+                                    raycastHit = __instance._raycastHits[i];
+                                    groundDistance = __instance.GetGroundHitDistance(__instance._raycastHits[i]);
                                     break;
                                 }
-
-                                num7++;
                             }
                         }
-
-                        raycastHitNum++;
                     }
                 }
 
@@ -111,6 +119,7 @@ public class PlayerScaleController : ScaleController
                     }
                 }
             }
+
             IgnoreCollision ignoreCollision = canBecomeGrounded ? raycastHit.collider.GetComponent<IgnoreCollision>() : null;
             if (canBecomeGrounded && (ignoreCollision == null || !ignoreCollision.IgnoresPlayer()))
             {
@@ -159,7 +168,16 @@ public class PlayerScaleController : ScaleController
     [HarmonyPatch(typeof(PlayerBody), nameof(PlayerBody.Awake))]
     private static void AddToPlayerBody(PlayerBody __instance)
     {
-        __instance.gameObject.AddComponent<PlayerScaleController>();
+        PlayerScaleController scaleController = __instance.gameObject.AddComponent<PlayerScaleController>();
+        // fire on the next update to avoid breaking things
+        ModMain.Instance.ModHelper.Events.Unity.FireOnNextUpdate(() =>
+        {
+            if (ModMain.Instance.GetConfigSetting<bool>("UseCustomPlayerScale"))
+            {
+                scaleController.Scale = ModMain.Instance.GetConfigSetting<float>("PlayerScale");
+                __instance.transform.position += __instance.GetLocalUpDirection() * (-1 + 1 * scaleController.Scale);
+            }
+        });
     }
 
     [HarmonyPostfix]
@@ -213,7 +231,7 @@ public class PlayerScaleController : ScaleController
     {
         if (ModMain.Instance.GetConfigSetting<bool>("UseCustomPlayerScale"))
         {
-            Scale = ModMain.Instance.GetConfigSetting<float>("PlayerScale");
+            targetScale = ModMain.Instance.GetConfigSetting<float>("PlayerScale");
 
             PlayerCharacterController player = GetComponent<PlayerCharacterController>();
             if (ModMain.Instance.GetConfigSetting<bool>("UseScaledPlayerAttributes") && Scale != 1)
@@ -243,18 +261,22 @@ public class PlayerScaleController : ScaleController
         Locator.GetPlayerCamera().nearClipPlane = 0.1f * Scale;
     }
 
+    private void FixedUpdate()
+    {
+        if (Scale != targetScale)
+        {
+            transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one * targetScale, 0.1f);
+        }
+    }
+
     private void LateUpdate()
     {
-        AnimSpeed = 1f / Instance.Scale;
+        AnimSpeed = Mathf.Max(Mathf.Sqrt(Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude * (1f / Instance.Scale) / 6f), 1f);
 
         // yield to Hiker's Mod or Immersion if they are installed
-        if (!ModMain.Instance.ModHelper.Interaction.ModExists("Owen013.MovementMod"))
+        if (!ModMain.Instance.ModHelper.Interaction.ModExists("Owen013.MovementMod") && !ModMain.Instance.ModHelper.Interaction.ModExists("Owen_013.FirstPersonPresence"))
         {
-            AnimSpeed = Mathf.Max(Mathf.Sqrt(Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude * AnimSpeed / 6f), 1f);
-            if (!ModMain.Instance.ModHelper.Interaction.ModExists("Owen_013.FirstPersonPresence"))
-            {
-                Locator.GetPlayerController().GetComponentInChildren<Animator>().speed = AnimSpeed;
-            }
+            Locator.GetPlayerController().GetComponentInChildren<Animator>().speed = AnimSpeed;
         }
     }
 }

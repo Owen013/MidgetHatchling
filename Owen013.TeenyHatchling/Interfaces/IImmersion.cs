@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace SmolHatchling.Interfaces;
+namespace ScaleManipulator.Interfaces;
 
 public interface IImmersion
 {

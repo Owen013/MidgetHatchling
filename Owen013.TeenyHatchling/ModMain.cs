@@ -1,10 +1,10 @@
 ﻿using HarmonyLib;
 using OWML.Common;
 using OWML.ModHelper;
-using SmolHatchling.Components;
+using ScaleManipulator.Components;
 using System.Reflection;
 
-namespace SmolHatchling;
+namespace ScaleManipulator;
 
 public class ModMain : ModBehaviour
 {
@@ -12,7 +12,7 @@ public class ModMain : ModBehaviour
 
     public override object GetApi()
     {
-        return new SmolHatchlingAPI();
+        return new ScaleManipulatorAPI();
     }
 
     public override void Configure(IModConfig config)
@@ -34,14 +34,15 @@ public class ModMain : ModBehaviour
     {
         Instance = this;
         Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
-        if (ModHelper.Interaction.ModExists("Owen013.MovementMod"))
-        {
-            ModHelper.HarmonyHelper.AddPrefix<DreamLanternItem>(nameof(DreamLanternItem.OverrideMaxRunSpeed), typeof(PlayerScaleController), nameof(PlayerScaleController.OverrideMaxRunSpeed));
-        }
     }
 
     private void Start()
     {
+        if (ModHelper.Interaction.ModExists("Owen013.MovementMod"))
+        {
+            ModHelper.HarmonyHelper.AddPrefix<DreamLanternItem>(nameof(DreamLanternItem.OverrideMaxRunSpeed), typeof(PlayerScaleController), nameof(PlayerScaleController.OverrideMaxRunSpeed));
+        }
+
         Print($"Smol Hatchling is ready to go!", MessageType.Success);
     }
 }
