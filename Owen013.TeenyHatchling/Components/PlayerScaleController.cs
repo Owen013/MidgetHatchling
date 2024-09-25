@@ -164,6 +164,59 @@ public class PlayerScaleController : ScaleController
         return false;
     }
 
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(JetpackThrusterModel), nameof(JetpackThrusterModel.FireTranslationalThrusters))]
+    private static bool JetpackThrusterModel_FireTranslationalThrusters(JetpackThrusterModel __instance)
+    {
+        if (ModMain.Instance.GetConfigSetting<bool>("UseScaledPlayerAttributes") == false) return true;
+
+        float y = __instance._translationalInput.y * __instance._maxTranslationalThrust;
+        if (__instance._boostActivated)
+        {
+            float num = 0.06666667f - Time.fixedDeltaTime * 0.5f;
+            float num2 = 0f;
+            if (Time.time < __instance._lastJumpTime + num)
+            {
+                y = 0f;
+            }
+            else if (Locator.GetPlayerRulesetDetector().IsJetpackBoosterNerfed(out num2))
+            {
+                float num3 = Mathf.InverseLerp(__instance._lastJumpTime + num, __instance._lastJumpTime + num2, Time.time);
+                y = __instance._boostThrust * num3;
+            }
+            else
+            {
+                y = __instance._boostThrust;
+            }
+            __instance._boostChargeFraction -= Time.deltaTime / __instance._boostSeconds;
+            __instance._boostChargeFraction = Mathf.Clamp01(__instance._boostChargeFraction);
+            if (__instance._boostChargeFraction == 0f)
+            {
+                __instance._boostActivated = false;
+                RumbleManager.StopJetpackBoost();
+            }
+        }
+        else
+        {
+            __instance._boostChargeFraction += Time.deltaTime / __instance._chargeSeconds;
+            __instance._boostChargeFraction = Mathf.Clamp01(__instance._boostChargeFraction);
+        }
+
+        __instance._localAcceleration = new Vector3(__instance._translationalInput.x * __instance._maxTranslationalThrust, y, __instance._translationalInput.z * __instance._maxTranslationalThrust);
+        __instance._isTranslationalFiring = (__instance._localAcceleration.magnitude > 0f);
+        if (__instance._isTranslationalFiring)
+        {
+            __instance._owRigidbody.AddLocalAcceleration(__instance._localAcceleration * Instance.Scale);
+            if (Locator.GetPlayerRulesetDetector().GetRingRiverRuleset() != null)
+            {
+                Vector3 localAcceleration = Locator.GetPlayerRulesetDetector().GetRingRiverRuleset().CalculateJetpackCounterAcceleration(__instance._localAcceleration, __instance.transform, __instance._owRigidbody);
+                __instance._owRigidbody.AddLocalAcceleration(localAcceleration * Instance.Scale);
+            }
+        }
+
+        return false;
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerBody), nameof(PlayerBody.Awake))]
     private static void AddToPlayerBody(PlayerBody __instance)
@@ -242,27 +295,28 @@ public class PlayerScaleController : ScaleController
             targetScale = ModMain.Instance.GetConfigSetting<float>("PlayerScale");
 
             PlayerCharacterController player = GetComponent<PlayerCharacterController>();
+            JetpackThrusterModel jetpack = GetComponent<JetpackThrusterModel>();
             if (ModMain.Instance.GetConfigSetting<bool>("UseScaledPlayerAttributes") && Scale != 1)
             {
-                player._runSpeed = 6f * Scale;
-                player._strafeSpeed = 4f * Scale;
-                player._walkSpeed = 3f * Scale;
-                player._airSpeed = 3f * Scale;
+                player._runSpeed = 6 * Scale;
+                player._strafeSpeed = 4 * Scale;
+                player._walkSpeed = 3 * Scale;
+                player._airSpeed = 3 * Scale;
                 player._acceleration = 0.5f * Scale;
                 player._airAcceleration = 0.09f * Scale;
-                player._minJumpSpeed = 3f * Scale;
-                player._maxJumpSpeed = 7f * Scale;
+                player._minJumpSpeed = 3 * Scale;
+                player._maxJumpSpeed = 7 * Scale;
             }
             else
             {
-                player._runSpeed = 6f;
-                player._strafeSpeed = 4f;
-                player._walkSpeed = 3f;
-                player._airSpeed = 3f;
+                player._runSpeed = 6;
+                player._strafeSpeed = 4;
+                player._walkSpeed = 3;
+                player._airSpeed = 3;
                 player._acceleration = 0.5f;
                 player._airAcceleration = 0.09f;
-                player._minJumpSpeed = 3f;
-                player._maxJumpSpeed = 7f;
+                player._minJumpSpeed = 3;
+                player._maxJumpSpeed = 7;
             }
         }
 
@@ -293,7 +347,7 @@ public class PlayerScaleController : ScaleController
  *  ISSUES
  *  - Footstep particles stay huge when you shrink back down
  *  - player jump curve slowdown doesn't scale
- *  - player jetpack power doesn't scale
  *  - camera is in wrong place in most attach points
+ *  - lock on HUD disappears at large scales
  *  
  */
