@@ -113,9 +113,9 @@ public class PlayerScaleController : ScaleController
                     Vector3 vector = __instance._transform.InverseTransformDirection(__instance._owRigidbody.GetVelocity() - __instance._groundBody.GetPointVelocity(__instance._transform.position));
                     if (vector.y > 0f)
                     {
-                        Vector3 a = -Vector3.Project(vector, onNormal);
-                        a.y = -vector.y;
-                        __instance._owRigidbody.AddLocalVelocityChange(a * 0.7f * time);
+                        Vector3 projectedNormal = -Vector3.Project(vector, onNormal);
+                        projectedNormal.y = -vector.y;
+                        __instance._owRigidbody.AddLocalVelocityChange(projectedNormal * 0.7f * time);
                     }
                 }
             }
@@ -192,23 +192,31 @@ public class PlayerScaleController : ScaleController
     [HarmonyPatch(typeof(PlayerAnimController), nameof(PlayerAnimController.LateUpdate))]
     public static void SetRunAnimFloats(PlayerAnimController __instance)
     {
-        Vector3 vector = Vector3.zero;
+        Vector3 groundVelocity = Vector3.zero;
         if (!PlayerState.IsAttached())
         {
-            vector = Locator.GetPlayerController().GetRelativeGroundVelocity();
+            groundVelocity = Locator.GetPlayerController().GetRelativeGroundVelocity();
         }
 
-        if (Mathf.Abs(vector.x) < 0.05f)
+        if (Mathf.Abs(groundVelocity.x) < 0.05f)
         {
-            vector.x = 0f;
+            groundVelocity.x = 0f;
         }
 
-        if (Mathf.Abs(vector.z) < 0.05f)
+        if (Mathf.Abs(groundVelocity.z) < 0.05f)
         {
-            vector.z = 0f;
+            groundVelocity.z = 0f;
         }
-        __instance._animator.SetFloat("RunSpeedX", vector.x / (3f * Instance.Scale));
-        __instance._animator.SetFloat("RunSpeedY", vector.z / (3f * Instance.Scale));
+        __instance._animator.SetFloat("RunSpeedX", groundVelocity.x / (3f * Instance.Scale));
+        __instance._animator.SetFloat("RunSpeedY", groundVelocity.z / (3f * Instance.Scale));
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.GetMinImpactSpeed))]
+    [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.GetMaxImpactSpeed))]
+    public static void GetImpactSpeed(ref float __result)
+    {
+        __result *= Instance.Scale;
     }
 
     // this patch is added manually if Hiker's Mod is not installed
@@ -284,7 +292,6 @@ public class PlayerScaleController : ScaleController
 /*      
  *  ISSUES
  *  - Footstep particles stay huge when you shrink back down
- *  - player impact resilience doesn't increase with size
  *  - player jump curve slowdown doesn't scale
  *  - player jetpack power doesn't scale
  *  - camera is in wrong place in most attach points
