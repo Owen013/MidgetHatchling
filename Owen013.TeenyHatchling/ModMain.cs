@@ -9,6 +9,11 @@ public class ModMain : ModBehaviour
 {
     public static ModMain Instance { get; private set; }
 
+    public override object GetApi()
+    {
+        return new SmolHatchlingAPI();
+    }
+
     public T GetConfigSetting<T>(string settingName)
     {
         return ModHelper.Config.GetSettingsValue<T>(settingName);
