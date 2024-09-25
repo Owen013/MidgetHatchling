@@ -14,6 +14,11 @@ public class ModMain : ModBehaviour
         return new SmolHatchlingAPI();
     }
 
+    public override void Configure(IModConfig config)
+    {
+        base.Configure(config);
+    }
+
     public T GetConfigSetting<T>(string settingName)
     {
         return ModHelper.Config.GetSettingsValue<T>(settingName);
@@ -32,6 +37,6 @@ public class ModMain : ModBehaviour
 
     private void Start()
     {
-        
+        Print($"Smol Hatchling is ready to go!", MessageType.Success);
     }
 }

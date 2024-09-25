@@ -1,4 +1,7 @@
-﻿using HarmonyLib;
+﻿using Epic.OnlineServices;
+using HarmonyLib;
+using OWML.ModHelper;
+using SmolHatchling.Interfaces;
 using UnityEngine;
 
 namespace SmolHatchling.Components;
@@ -195,6 +198,30 @@ public class PlayerScaleController : ScaleController
         if (ModMain.Instance.GetConfigSetting<bool>("UseCustomPlayerScale"))
         {
             scale = ModMain.Instance.GetConfigSetting<float>("PlayerScale");
+
+            PlayerCharacterController player = GetComponent<PlayerCharacterController>();
+            if (ModMain.Instance.GetConfigSetting<bool>("UseScaledPlayerAttributes") && scale != 1)
+            {
+                player._runSpeed = 6f * scale;
+                player._strafeSpeed = 4f * scale;
+                player._walkSpeed = 3f * scale;
+                player._airSpeed = 3f * scale;
+                player._acceleration = 0.5f * scale;
+                player._airAcceleration = 0.09f * scale;
+                player._minJumpSpeed = 3f * Mathf.Sqrt(scale);
+                player._maxJumpSpeed = 7f * Mathf.Sqrt(scale);
+            }
+            else
+            {
+                player._runSpeed = 6f;
+                player._strafeSpeed = 4f;
+                player._walkSpeed = 3f;
+                player._airSpeed = 3f;
+                player._acceleration = 0.5f;
+                player._airAcceleration = 0.09f;
+                player._minJumpSpeed = 3f;
+                player._maxJumpSpeed = 7f;
+            }
         }
 
         Locator.GetPlayerCamera().nearClipPlane = 0.1f * scale;

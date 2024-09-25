@@ -24,20 +24,21 @@ public class SmolHatchlingAPI
     [Obsolete]
     public Vector3 GetTargetScale()
     {
-        ModMain.Instance.Print("GetTargetScale() is deprecated. Use GetPlayerScale() instead.", OWML.Common.MessageType.Warning);
+        ModMain.Instance.Print("GetTargetScale() is deprecated. Use GetPlayerScale() instead.", OWML.Common.MessageType.Debug);
         return Vector3.one * PlayerScaleController.Instance.scale;
     }
 
+    [Obsolete]
     public Vector3 GetCurrentScale()
     {
-        ModMain.Instance.Print("GetCurrentScale() is deprecated. Use GetPlayerScale() instead.", OWML.Common.MessageType.Warning);
+        ModMain.Instance.Print("GetCurrentScale() is deprecated. Use GetPlayerScale() instead.", OWML.Common.MessageType.Debug);
         return Vector3.one * PlayerScaleController.Instance.scale;
     }
 
     [Obsolete]
     public float GetAnimSpeed()
     {
-        ModMain.Instance.Print("GetAnimSpeed() is deprecated. Use GetPlayerAnimSpeed() instead.", OWML.Common.MessageType.Warning);
+        ModMain.Instance.Print("GetAnimSpeed() is deprecated. Use GetPlayerAnimSpeed() instead.", OWML.Common.MessageType.Debug);
         return PlayerScaleController.animSpeed;
     }
 }
