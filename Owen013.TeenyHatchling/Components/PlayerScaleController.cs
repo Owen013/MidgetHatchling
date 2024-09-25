@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using Epic.OnlineServices;
+using HarmonyLib;
 using UnityEngine;
 
 namespace SmolHatchling.Components;
@@ -23,17 +24,17 @@ public class PlayerScaleController : ScaleController
         float radius = 0.46f;
         float maxDistance = (wasGrounded ? 0.1f : 0.06f) * time + (1f - radius);
         float scale = __instance.GetComponent<PlayerScaleController>().Scale;
-        int sphereCastHits = Physics.SphereCastNonAlloc(__instance._owRigidbody.GetPosition(), radius * scale, -localUpDirection, __instance._raycastHits, maxDistance * scale, OWLayerMask.groundMask, QueryTriggerInteraction.Ignore);
+        int numSphereCastHits = Physics.SphereCastNonAlloc(__instance._owRigidbody.GetPosition(), radius * scale, -localUpDirection, __instance._raycastHits, maxDistance * scale, OWLayerMask.groundMask, QueryTriggerInteraction.Ignore);
         RaycastHit raycastHit = default(RaycastHit);
-        bool flag3 = false;
-        for (int i = 0; i < sphereCastHits; i++)
+        bool hasValidGroundedHit = false;
+        for (int i = 0; i < numSphereCastHits; i++)
         {
             if (__instance.IsValidGroundedHit(__instance._raycastHits[i]))
             {
-                if (!flag3)
+                if (!hasValidGroundedHit)
                 {
                     raycastHit = __instance._raycastHits[i];
-                    flag3 = true;
+                    hasValidGroundedHit = true;
                 }
                 else if (__instance._raycastHits[i].distance < raycastHit.distance)
                 {
@@ -41,27 +42,28 @@ public class PlayerScaleController : ScaleController
                 }
             }
         }
-        if (flag3)
+
+        if (hasValidGroundedHit)
         {
-            float num5 = float.PositiveInfinity;
-            bool flag4 = false;
+            float groundDistance = float.PositiveInfinity;
+            bool canBecomeGrounded = false;
             if (__instance.AllowGroundedOnRigidbody(raycastHit.rigidbody) && Vector3.Angle(localUpDirection, raycastHit.normal) <= (float)__instance._maxAngleToBeGrounded)
             {
-                num5 = __instance.GetGroundHitDistance(raycastHit);
-                flag4 = true;
+                groundDistance = __instance.GetGroundHitDistance(raycastHit);
+                canBecomeGrounded = true;
             }
             else
             {
-                for (int j = 0; j < sphereCastHits; j++)
+                for (int j = 0; j < numSphereCastHits; j++)
                 {
                     if (__instance.IsValidGroundedHit(__instance._raycastHits[j]) && __instance.AllowGroundedOnRigidbody(__instance._raycastHits[j].rigidbody))
                     {
                         float groundHitDistance = __instance.GetGroundHitDistance(__instance._raycastHits[j]);
-                        num5 = Mathf.Min(num5, groundHitDistance);
+                        groundDistance = Mathf.Min(groundDistance, groundHitDistance);
                         if (Vector3.Angle(localUpDirection, __instance._raycastHits[j].normal) <= (float)__instance._maxAngleToBeGrounded)
                         {
                             raycastHit = __instance._raycastHits[j];
-                            flag4 = true;
+                            canBecomeGrounded = true;
                         }
                         else
                         {
@@ -69,30 +71,34 @@ public class PlayerScaleController : ScaleController
                         }
                     }
                 }
-                if (!flag4)
+
+                if (!canBecomeGrounded)
                 {
-                    int num6 = 0;
-                    while (num6 < sphereCastHits && !__instance._isGrounded)
+                    int raycastHitNum = 0;
+                    while (raycastHitNum < numSphereCastHits && !__instance._isGrounded)
                     {
-                        if (__instance.IsValidGroundedHit(__instance._raycastHits[num6]))
+                        if (__instance.IsValidGroundedHit(__instance._raycastHits[raycastHitNum]))
                         {
-                            int num7 = num6 + 1;
-                            while (num7 < sphereCastHits && !__instance._isGrounded)
+                            int num7 = raycastHitNum + 1;
+                            while (num7 < numSphereCastHits && !__instance._isGrounded)
                             {
-                                if (__instance.IsValidGroundedHit(__instance._raycastHits[num6]) && Vector3.Angle(__instance._raycastHitNormals[num6], __instance._raycastHitNormals[num7]) > (float)__instance._maxAngleBetweenSlopes)
+                                if (__instance.IsValidGroundedHit(__instance._raycastHits[raycastHitNum]) && Vector3.Angle(__instance._raycastHitNormals[raycastHitNum], __instance._raycastHitNormals[num7]) > (float)__instance._maxAngleBetweenSlopes)
                                 {
-                                    flag4 = true;
-                                    raycastHit = __instance._raycastHits[num6];
-                                    num5 = __instance.GetGroundHitDistance(__instance._raycastHits[num6]);
+                                    canBecomeGrounded = true;
+                                    raycastHit = __instance._raycastHits[raycastHitNum];
+                                    groundDistance = __instance.GetGroundHitDistance(__instance._raycastHits[raycastHitNum]);
                                     break;
                                 }
+
                                 num7++;
                             }
                         }
-                        num6++;
+
+                        raycastHitNum++;
                     }
                 }
-                if (!flag4 && __instance._wasGrounded && raycastHit.collider.material.dynamicFriction > 0f)
+
+                if (!canBecomeGrounded && __instance._wasGrounded && raycastHit.collider.material.dynamicFriction > 0f)
                 {
                     Vector3 onNormal = __instance._transform.InverseTransformPoint(raycastHit.point);
                     onNormal.y = 0f;
@@ -105,15 +111,16 @@ public class PlayerScaleController : ScaleController
                     }
                 }
             }
-            IgnoreCollision ignoreCollision = flag4 ? raycastHit.collider.GetComponent<IgnoreCollision>() : null;
-            if (flag4 && (ignoreCollision == null || !ignoreCollision.IgnoresPlayer()))
+            IgnoreCollision ignoreCollision = canBecomeGrounded ? raycastHit.collider.GetComponent<IgnoreCollision>() : null;
+            if (canBecomeGrounded && (ignoreCollision == null || !ignoreCollision.IgnoresPlayer()))
             {
                 if (wasGrounded)
                 {
-                    Vector3 vector2 = -localUpDirection * Mathf.Max(0f, num5);
+                    Vector3 vector2 = -localUpDirection * Mathf.Max(0f, groundDistance);
                     vector2 += localUpDirection * 0.001f;
                     __instance.transform.position = __instance.transform.position + vector2;
                 }
+
                 if (raycastHit.rigidbody != null)
                 {
                     __instance._groundBody = raycastHit.rigidbody.GetRequiredComponent<OWRigidbody>();
@@ -123,6 +130,7 @@ public class PlayerScaleController : ScaleController
                     Debug.LogError("The collider we're trying to stand on is not attached to a Rigidbody!");
                     Debug.Break();
                 }
+
                 __instance._groundCollider = raycastHit.collider;
                 __instance._groundContactPt = raycastHit.point;
                 __instance._groundNormal = raycastHit.normal;
@@ -132,9 +140,10 @@ public class PlayerScaleController : ScaleController
                 {
                     __instance._collidingQuantumObject.SetPlayerStandingOnObject(true);
                 }
+
                 __instance._movingPlatform = __instance._groundCollider.GetComponentInParent<MovingPlatform>();
                 __instance._groundedOnRisingSand = __instance._groundCollider.CompareTag("RisingSand");
-                __instance._antiSinkingCollider.enabled = (__instance._wasGrounded && num5 > -0.1f);
+                __instance._antiSinkingCollider.enabled = (__instance._wasGrounded && groundDistance > -0.1f);
                 __instance._isGrounded = true;
                 if (!__instance._wasGrounded)
                 {
@@ -184,6 +193,17 @@ public class PlayerScaleController : ScaleController
         __instance._animator.SetFloat("RunSpeedY", vector.z / (3f * Instance.Scale));
     }
 
+    // this patch is added manually if Hiker's Mod is not installed
+    public static bool OverrideMaxRunSpeed(ref float maxSpeedX, ref float maxSpeedZ, DreamLanternItem __instance)
+    {
+        if (!ModMain.Instance.GetConfigSetting<bool>("UseScaledPlayerAttributes")) return true;
+
+        float lerpPosition = 1f - __instance._lanternController.GetFocus();
+        lerpPosition *= lerpPosition;
+        maxSpeedX = Mathf.Lerp(2f * Instance.Scale, maxSpeedX, lerpPosition);
+        maxSpeedZ = Mathf.Lerp(2f * Instance.Scale, maxSpeedZ, lerpPosition);
+        return false;
+    }
     private void Awake()
     {
         Instance = this;
@@ -240,8 +260,11 @@ public class PlayerScaleController : ScaleController
 }
 
 /*      
- *      ISSUES
+ *  ISSUES
  *  - Footstep particles stay huge when you shrink back down
- *  - helmet HUD disappears at small player scale
+ *  - player impact resilience doesn't increase with size
+ *  - player jump curve slowdown doesn't scale
+ *  - player jetpack power doesn't scale
+ *  - camera is in wrong place in most attach points
  *  
  */

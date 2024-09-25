@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using OWML.Common;
 using OWML.ModHelper;
+using SmolHatchling.Components;
 using System.Reflection;
 
 namespace SmolHatchling;
@@ -33,6 +34,10 @@ public class ModMain : ModBehaviour
     {
         Instance = this;
         Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
+        if (ModHelper.Interaction.ModExists("Owen013.MovementMod"))
+        {
+            ModHelper.HarmonyHelper.AddPrefix<DreamLanternItem>(nameof(DreamLanternItem.OverrideMaxRunSpeed), typeof(PlayerScaleController), nameof(PlayerScaleController.OverrideMaxRunSpeed));
+        }
     }
 
     private void Start()
