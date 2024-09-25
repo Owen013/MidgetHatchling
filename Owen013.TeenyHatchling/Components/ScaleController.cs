@@ -4,7 +4,7 @@ namespace SmolHatchling.Components;
 
 public class ScaleController : MonoBehaviour
 {
-    public virtual float scale
+    public virtual float Scale
     {
         get
         {

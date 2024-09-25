@@ -8,12 +8,12 @@ public class SmolHatchlingAPI
 {
     public float GetPlayerScale()
     {
-        return PlayerScaleController.Instance.scale;
+        return PlayerScaleController.Instance.Scale;
     }
 
     public float GetPlayerAnimSpeed()
     {
-        return PlayerScaleController.animSpeed;
+        return PlayerScaleController.AnimSpeed;
     }
 
     public bool UseScaledPlayerAttributes()
@@ -25,20 +25,20 @@ public class SmolHatchlingAPI
     public Vector3 GetTargetScale()
     {
         ModMain.Instance.Print("GetTargetScale() is deprecated. Use GetPlayerScale() instead.", OWML.Common.MessageType.Debug);
-        return Vector3.one * PlayerScaleController.Instance.scale;
+        return Vector3.one * PlayerScaleController.Instance.Scale;
     }
 
     [Obsolete]
     public Vector3 GetCurrentScale()
     {
         ModMain.Instance.Print("GetCurrentScale() is deprecated. Use GetPlayerScale() instead.", OWML.Common.MessageType.Debug);
-        return Vector3.one * PlayerScaleController.Instance.scale;
+        return Vector3.one * PlayerScaleController.Instance.Scale;
     }
 
     [Obsolete]
     public float GetAnimSpeed()
     {
         ModMain.Instance.Print("GetAnimSpeed() is deprecated. Use GetPlayerAnimSpeed() instead.", OWML.Common.MessageType.Debug);
-        return PlayerScaleController.animSpeed;
+        return PlayerScaleController.AnimSpeed;
     }
 }

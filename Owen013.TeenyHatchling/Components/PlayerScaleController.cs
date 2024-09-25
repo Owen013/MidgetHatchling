@@ -1,7 +1,4 @@
-﻿using Epic.OnlineServices;
-using HarmonyLib;
-using OWML.ModHelper;
-using SmolHatchling.Interfaces;
+﻿using HarmonyLib;
 using UnityEngine;
 
 namespace SmolHatchling.Components;
@@ -11,7 +8,7 @@ public class PlayerScaleController : ScaleController
 {
     public static PlayerScaleController Instance { get; private set; }
 
-    public static float animSpeed { get; private set; }
+    public static float AnimSpeed { get; private set; }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.CastForGrounded))]
@@ -19,18 +16,17 @@ public class PlayerScaleController : ScaleController
     {
         if (ModMain.Instance.GetConfigSetting<float>("PlayerScale") == 1) return true;
 
-        float num = Time.fixedDeltaTime * 60f;
-        bool flag = __instance._fluidDetector.InFluidType(FluidVolume.Type.TRACTOR_BEAM) || __instance._fluidDetector.InFluidType(FluidVolume.Type.SAND) || __instance._fluidDetector.InFluidType(FluidVolume.Type.WATER);
-        bool flag2 = __instance._groundSnappingEnabled && __instance._wasGrounded && !flag && __instance._jetpackModel.GetLocalAcceleration().y <= 0f && Time.time > __instance._lastJumpTime + 0.5f;
-        float num2 = (flag2 ? 0.1f : 0.06f) * num;
+        float time = Time.fixedDeltaTime * 60f;
+        bool isInFluid = __instance._fluidDetector.InFluidType(FluidVolume.Type.TRACTOR_BEAM) || __instance._fluidDetector.InFluidType(FluidVolume.Type.SAND) || __instance._fluidDetector.InFluidType(FluidVolume.Type.WATER);
+        bool wasGrounded = __instance._groundSnappingEnabled && __instance._wasGrounded && !isInFluid && __instance._jetpackModel.GetLocalAcceleration().y <= 0f && Time.time > __instance._lastJumpTime + 0.5f;
         Vector3 localUpDirection = __instance._owRigidbody.GetLocalUpDirection();
-        float num3 = 0.46f;
-        float maxDistance = num2 + (1f - num3);
-        float scale = __instance.GetComponent<PlayerScaleController>().scale;
-        int num4 = Physics.SphereCastNonAlloc(__instance._owRigidbody.GetPosition(), num3 * scale, -localUpDirection, __instance._raycastHits, maxDistance * scale, OWLayerMask.groundMask, QueryTriggerInteraction.Ignore);
+        float radius = 0.46f;
+        float maxDistance = (wasGrounded ? 0.1f : 0.06f) * time + (1f - radius);
+        float scale = __instance.GetComponent<PlayerScaleController>().Scale;
+        int sphereCastHits = Physics.SphereCastNonAlloc(__instance._owRigidbody.GetPosition(), radius * scale, -localUpDirection, __instance._raycastHits, maxDistance * scale, OWLayerMask.groundMask, QueryTriggerInteraction.Ignore);
         RaycastHit raycastHit = default(RaycastHit);
         bool flag3 = false;
-        for (int i = 0; i < num4; i++)
+        for (int i = 0; i < sphereCastHits; i++)
         {
             if (__instance.IsValidGroundedHit(__instance._raycastHits[i]))
             {
@@ -56,7 +52,7 @@ public class PlayerScaleController : ScaleController
             }
             else
             {
-                for (int j = 0; j < num4; j++)
+                for (int j = 0; j < sphereCastHits; j++)
                 {
                     if (__instance.IsValidGroundedHit(__instance._raycastHits[j]) && __instance.AllowGroundedOnRigidbody(__instance._raycastHits[j].rigidbody))
                     {
@@ -76,12 +72,12 @@ public class PlayerScaleController : ScaleController
                 if (!flag4)
                 {
                     int num6 = 0;
-                    while (num6 < num4 && !__instance._isGrounded)
+                    while (num6 < sphereCastHits && !__instance._isGrounded)
                     {
                         if (__instance.IsValidGroundedHit(__instance._raycastHits[num6]))
                         {
                             int num7 = num6 + 1;
-                            while (num7 < num4 && !__instance._isGrounded)
+                            while (num7 < sphereCastHits && !__instance._isGrounded)
                             {
                                 if (__instance.IsValidGroundedHit(__instance._raycastHits[num6]) && Vector3.Angle(__instance._raycastHitNormals[num6], __instance._raycastHitNormals[num7]) > (float)__instance._maxAngleBetweenSlopes)
                                 {
@@ -105,14 +101,14 @@ public class PlayerScaleController : ScaleController
                     {
                         Vector3 a = -Vector3.Project(vector, onNormal);
                         a.y = -vector.y;
-                        __instance._owRigidbody.AddLocalVelocityChange(a * 0.7f * num);
+                        __instance._owRigidbody.AddLocalVelocityChange(a * 0.7f * time);
                     }
                 }
             }
             IgnoreCollision ignoreCollision = flag4 ? raycastHit.collider.GetComponent<IgnoreCollision>() : null;
             if (flag4 && (ignoreCollision == null || !ignoreCollision.IgnoresPlayer()))
             {
-                if (flag2)
+                if (wasGrounded)
                 {
                     Vector3 vector2 = -localUpDirection * Mathf.Max(0f, num5);
                     vector2 += localUpDirection * 0.001f;
@@ -162,7 +158,7 @@ public class PlayerScaleController : ScaleController
     public static void GhostLiftedPlayer(GhostGrabController __instance)
     {
         // Offset attachment so that camera is where it normally is
-        __instance._attachPoint._attachOffset = new Vector3(0, 0.8496f * (1 - Instance.scale), 0.15f * (1 - Instance.scale));
+        __instance._attachPoint._attachOffset = new Vector3(0, 0.8496f * (1 - Instance.Scale), 0.15f * (1 - Instance.Scale));
     }
 
     [HarmonyPostfix]
@@ -184,8 +180,8 @@ public class PlayerScaleController : ScaleController
         {
             vector.z = 0f;
         }
-        __instance._animator.SetFloat("RunSpeedX", vector.x / (3f * Instance.scale));
-        __instance._animator.SetFloat("RunSpeedY", vector.z / (3f * Instance.scale));
+        __instance._animator.SetFloat("RunSpeedX", vector.x / (3f * Instance.Scale));
+        __instance._animator.SetFloat("RunSpeedY", vector.z / (3f * Instance.Scale));
     }
 
     private void Awake()
@@ -197,19 +193,19 @@ public class PlayerScaleController : ScaleController
     {
         if (ModMain.Instance.GetConfigSetting<bool>("UseCustomPlayerScale"))
         {
-            scale = ModMain.Instance.GetConfigSetting<float>("PlayerScale");
+            Scale = ModMain.Instance.GetConfigSetting<float>("PlayerScale");
 
             PlayerCharacterController player = GetComponent<PlayerCharacterController>();
-            if (ModMain.Instance.GetConfigSetting<bool>("UseScaledPlayerAttributes") && scale != 1)
+            if (ModMain.Instance.GetConfigSetting<bool>("UseScaledPlayerAttributes") && Scale != 1)
             {
-                player._runSpeed = 6f * scale;
-                player._strafeSpeed = 4f * scale;
-                player._walkSpeed = 3f * scale;
-                player._airSpeed = 3f * scale;
-                player._acceleration = 0.5f * scale;
-                player._airAcceleration = 0.09f * scale;
-                player._minJumpSpeed = 3f * Mathf.Sqrt(scale);
-                player._maxJumpSpeed = 7f * Mathf.Sqrt(scale);
+                player._runSpeed = 6f * Scale;
+                player._strafeSpeed = 4f * Scale;
+                player._walkSpeed = 3f * Scale;
+                player._airSpeed = 3f * Scale;
+                player._acceleration = 0.5f * Scale;
+                player._airAcceleration = 0.09f * Scale;
+                player._minJumpSpeed = 3f * Scale;
+                player._maxJumpSpeed = 7f * Scale;
             }
             else
             {
@@ -224,20 +220,20 @@ public class PlayerScaleController : ScaleController
             }
         }
 
-        Locator.GetPlayerCamera().nearClipPlane = 0.1f * scale;
+        Locator.GetPlayerCamera().nearClipPlane = 0.1f * Scale;
     }
 
     private void LateUpdate()
     {
-        animSpeed = 1f / Instance.scale;
+        AnimSpeed = 1f / Instance.Scale;
 
         // yield to Hiker's Mod or Immersion if they are installed
         if (!ModMain.Instance.ModHelper.Interaction.ModExists("Owen013.MovementMod"))
         {
-            animSpeed = Mathf.Max(Mathf.Sqrt(Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude * animSpeed / 6f), 1f);
+            AnimSpeed = Mathf.Max(Mathf.Sqrt(Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude * AnimSpeed / 6f), 1f);
             if (!ModMain.Instance.ModHelper.Interaction.ModExists("Owen_013.FirstPersonPresence"))
             {
-                Locator.GetPlayerController().GetComponentInChildren<Animator>().speed = animSpeed;
+                Locator.GetPlayerController().GetComponentInChildren<Animator>().speed = AnimSpeed;
             }
         }
     }
