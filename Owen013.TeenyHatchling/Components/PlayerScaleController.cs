@@ -320,7 +320,7 @@ public class PlayerScaleController : ScaleController
             }
         }
 
-        Locator.GetPlayerCamera().nearClipPlane = 0.1f * Scale;
+        Locator.GetPlayerCamera().nearClipPlane = Mathf.Min(0.1f, 0.1f * Scale);
     }
 
     private void FixedUpdate()
@@ -348,6 +348,6 @@ public class PlayerScaleController : ScaleController
  *  - Footstep particles stay huge when you shrink back down
  *  - player jump curve slowdown doesn't scale
  *  - camera is in wrong place in most attach points
- *  - lock on HUD disappears at large scales
+ *  - flashlight distance doesn't scale
  *  
  */
