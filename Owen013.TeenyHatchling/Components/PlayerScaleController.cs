@@ -280,7 +280,7 @@ public class PlayerScaleController : ScaleController
     {
         if (ModMain.Instance.GetConfigSetting<bool>("ScalePlayerImpacts"))
         {
-            __result *= Instance.Scale;
+            __result *= Mathf.Max(Instance.Scale, Instance.TargetScale);
         }
     }
 
