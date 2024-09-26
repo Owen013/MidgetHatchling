@@ -328,10 +328,9 @@ public class PlayerScaleController : ScaleController
     {
         if (Scale != targetScale)
         {
-            transform.localScale = Vector3.MoveTowards(transform.localScale, Vector3.Lerp(transform.localScale, Vector3.one * targetScale, 0.1f), Time.deltaTime * 5);
-            if (Scale > targetScale - 0.01f) Scale = targetScale;
+            transform.localScale = Vector3.MoveTowards(transform.localScale, Vector3.Lerp(transform.localScale, Vector3.one * targetScale, 0.1f), Time.deltaTime * 10);
+            if (Mathf.Abs(Scale - targetScale) < 0.01f) Scale = targetScale;
             Locator.GetPlayerCamera().nearClipPlane = Mathf.Min(0.1f, 0.1f * Scale);
-            ModMain.HikersModAPI?.UpdateConfig();
         }
     }
 
@@ -358,5 +357,6 @@ public class PlayerScaleController : ScaleController
  *  - flashlight distance doesn't scale
  *  - freefall anim floats probably don't scale
  *  - can't slow walk at ~3+ scale
+ *  - maybe i should reduce wind volume when big?
  *  
  */

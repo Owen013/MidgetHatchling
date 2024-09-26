@@ -25,6 +25,11 @@ public class ModMain : ModBehaviour
         {
             PlayerScaleController.Instance.targetScale = GetConfigSetting<float>("PlayerScale");
         }
+
+        ModHelper.Events.Unity.FireOnNextUpdate(() =>
+        {
+            HikersModAPI?.UpdateConfig();
+        });
     }
 
     public T GetConfigSetting<T>(string settingName)
