@@ -15,7 +15,7 @@ public class ScaleManipulatorAPI
     public float GetPlayerTargetScale()
     {
         if (PlayerScaleController.Instance == null) return 1;
-        return PlayerScaleController.Instance.targetScale;
+        return PlayerScaleController.Instance.TargetScale;
     }
 
     public float GetPlayerAnimSpeed()
@@ -25,14 +25,14 @@ public class ScaleManipulatorAPI
 
     public bool UseScaledPlayerAttributes()
     {
-        return ModMain.Instance.GetConfigSetting<bool>("UseScaledPlayerAttributes");
+        return ModMain.Instance.GetConfigSetting<bool>("ScalePlayerSpeed");
     }
 
     [Obsolete]
     public Vector3 GetTargetScale()
     {
         ModMain.Instance.Print("GetTargetScale() is deprecated. Use GetPlayerScale() instead.", OWML.Common.MessageType.Debug);
-        return Vector3.one * PlayerScaleController.Instance.targetScale;
+        return Vector3.one * PlayerScaleController.Instance.TargetScale;
     }
 
     [Obsolete]

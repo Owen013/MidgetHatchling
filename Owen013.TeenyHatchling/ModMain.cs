@@ -23,13 +23,8 @@ public class ModMain : ModBehaviour
         base.Configure(config);
         if (GetConfigSetting<bool>("UseCustomPlayerScale") && PlayerScaleController.Instance != null)
         {
-            PlayerScaleController.Instance.targetScale = GetConfigSetting<float>("PlayerScale");
+            PlayerScaleController.Instance.EaseToScale(GetConfigSetting<float>("PlayerScale"));
         }
-
-        ModHelper.Events.Unity.FireOnNextUpdate(() =>
-        {
-            HikersModAPI?.UpdateConfig();
-        });
     }
 
     public T GetConfigSetting<T>(string settingName)
