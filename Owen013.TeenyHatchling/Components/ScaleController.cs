@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ScaleManipulator.Components;
+namespace SmolHatchling.Components;
 
 public class ScaleController : MonoBehaviour
 {

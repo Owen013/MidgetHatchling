@@ -1,4 +1,4 @@
-﻿namespace ScaleManipulator.Interfaces;
+﻿namespace SmolHatchling.Interfaces;
 
 public interface IHikersMod
 {
