@@ -1,11 +1,11 @@
 ﻿using HarmonyLib;
 using OWML.Common;
 using OWML.ModHelper;
-using SmolHatchling.Components;
-using SmolHatchling.Interfaces;
+using ScaleManipulator.Components;
+using ScaleManipulator.Interfaces;
 using System.Reflection;
 
-namespace SmolHatchling;
+namespace ScaleManipulator;
 
 public class ModMain : ModBehaviour
 {
@@ -15,7 +15,7 @@ public class ModMain : ModBehaviour
 
     public override object GetApi()
     {
-        return new SmolHatchlingAPI();
+        return new ScaleManipulatorAPI();
     }
 
     public override void Configure(IModConfig config)

@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using UnityEngine;
 
-namespace SmolHatchling.Components;
+namespace ScaleManipulator.Components;
 
 [HarmonyPatch]
 public class PlayerScaleController : ScaleController
