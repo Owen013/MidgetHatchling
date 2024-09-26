@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System;
 
-namespace ScaleManipulator;
+namespace SmolHatchling;
 
 public static class Extensions
 {

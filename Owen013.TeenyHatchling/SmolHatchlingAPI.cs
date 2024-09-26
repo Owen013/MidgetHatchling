@@ -1,10 +1,10 @@
-﻿using ScaleManipulator.Components;
+﻿using SmolHatchling.Components;
 using System;
 using UnityEngine;
 
-namespace ScaleManipulator;
+namespace SmolHatchling;
 
-public class ScaleManipulatorAPI
+public class SmolHatchlingAPI
 {
     public float GetPlayerScale()
     {
