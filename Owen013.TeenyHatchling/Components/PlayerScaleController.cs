@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace SmolHatchling.Components;
 
@@ -232,6 +233,10 @@ public class PlayerScaleController : ScaleController
                 scaleController.Scale = ModMain.Instance.GetConfigSetting<float>("PlayerScale");
                 __instance.transform.position += __instance.GetLocalUpDirection() * (-1 + 1 * Instance.Scale);
             }
+            else
+            {
+                Instance.TargetScale = 1;
+            }
 
             ModMain.HikersModAPI?.UpdateConfig();
         });
@@ -304,6 +309,30 @@ public class PlayerScaleController : ScaleController
 
     private void Update()
     {
+        if (ModMain.Instance.GetConfigSetting<bool>("UseCustomPlayerScale") && ModMain.Instance.GetConfigSetting<bool>("UseScaleHotkeys"))
+        {
+            if (Keyboard.current[Key.Comma].wasPressedThisFrame)
+            {
+                float newScale = ModMain.Instance.GetConfigSetting<float>("PlayerScale") / 2;
+                ModMain.Instance.SetConfigSetting("PlayerScale", newScale);
+                EaseToScale(newScale);
+            }
+
+            if (Keyboard.current[Key.Period].wasPressedThisFrame)
+            {
+                float newScale = ModMain.Instance.GetConfigSetting<float>("PlayerScale") * 2;
+                ModMain.Instance.SetConfigSetting("PlayerScale", newScale);
+                EaseToScale(newScale);
+            }
+
+            if (Keyboard.current[Key.Slash].wasPressedThisFrame)
+            {
+                float newScale = 1;
+                ModMain.Instance.SetConfigSetting("PlayerScale", newScale);
+                EaseToScale(newScale);
+            }
+        }
+
         if (ModMain.HikersModAPI == null)
         {
             PlayerCharacterController player = GetComponent<PlayerCharacterController>();

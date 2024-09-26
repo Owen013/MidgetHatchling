@@ -19,6 +19,12 @@
       "type": "number",
       "value": 1
     },
+    "UseScaleHotkeys": {
+      "title": "Use Scale Hotkeys",
+      "tooltip": "",
+      "type": "toggle",
+      "value": true
+    },
     "ScalePlayerSpeed": {
       "title": "Change Player Speed to Match Size",
       "tooltip": "Changes the speed, jump height, and acceleration of the player to match its size.",

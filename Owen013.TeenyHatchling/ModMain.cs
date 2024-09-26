@@ -21,15 +21,27 @@ public class ModMain : ModBehaviour
     public override void Configure(IModConfig config)
     {
         base.Configure(config);
-        if (GetConfigSetting<bool>("UseCustomPlayerScale") && PlayerScaleController.Instance != null)
+        if (PlayerScaleController.Instance != null)
         {
-            PlayerScaleController.Instance.EaseToScale(GetConfigSetting<float>("PlayerScale"));
+            if (GetConfigSetting<bool>("UseCustomPlayerScale"))
+            {
+                PlayerScaleController.Instance.EaseToScale(GetConfigSetting<float>("PlayerScale"));
+            }
+            else
+            {
+                PlayerScaleController.Instance.EaseToScale(1);
+            }
         }
     }
 
     public T GetConfigSetting<T>(string settingName)
     {
         return ModHelper.Config.GetSettingsValue<T>(settingName);
+    }
+
+    public void SetConfigSetting(string settingName, object value)
+    {
+        ModHelper.Config.SetSettingsValue(settingName, value);
     }
 
     public void Print(string text, MessageType messageType = MessageType.Message)
