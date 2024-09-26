@@ -21,10 +21,10 @@ public class ModMain : ModBehaviour
     public override void Configure(IModConfig config)
     {
         base.Configure(config);
-        ModHelper.Events.Unity.FireOnNextUpdate(() =>
+        if (GetConfigSetting<bool>("UseCustomPlayerScale") && PlayerScaleController.Instance != null)
         {
-            HikersModAPI?.UpdateConfig();
-        });
+            PlayerScaleController.Instance.targetScale = GetConfigSetting<float>("PlayerScale");
+        }
     }
 
     public T GetConfigSetting<T>(string settingName)

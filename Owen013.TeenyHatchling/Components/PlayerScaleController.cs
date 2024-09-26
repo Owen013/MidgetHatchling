@@ -20,6 +20,8 @@ public class PlayerScaleController : ScaleController
         {
             transform.localScale = Vector3.one * value;
             targetScale = value;
+            Locator.GetPlayerCamera().nearClipPlane = Mathf.Min(0.1f, 0.1f * Scale);
+            ModMain.HikersModAPI?.UpdateConfig();
         }
     }
 
@@ -29,7 +31,7 @@ public class PlayerScaleController : ScaleController
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.CastForGrounded))]
     private static bool PlayerCharacterController_CastForGrounded(PlayerCharacterController __instance)
     {
-        if (ModMain.Instance.GetConfigSetting<float>("PlayerScale") == 1) return true;
+        if (Instance.Scale == 1) return true;
 
         float time = Time.fixedDeltaTime * 60f;
         bool isInFluid = __instance._fluidDetector.InFluidType(FluidVolume.Type.TRACTOR_BEAM) || __instance._fluidDetector.InFluidType(FluidVolume.Type.SAND) || __instance._fluidDetector.InFluidType(FluidVolume.Type.WATER);
@@ -228,7 +230,7 @@ public class PlayerScaleController : ScaleController
             if (ModMain.Instance.GetConfigSetting<bool>("UseCustomPlayerScale"))
             {
                 scaleController.Scale = ModMain.Instance.GetConfigSetting<float>("PlayerScale");
-                __instance.transform.position += __instance.GetLocalUpDirection() * (-1 + 1 * scaleController.Scale);
+                __instance.transform.position += __instance.GetLocalUpDirection() * (-1 + 1 * Instance.Scale);
             }
 
             ModMain.HikersModAPI?.UpdateConfig();
@@ -285,6 +287,7 @@ public class PlayerScaleController : ScaleController
         maxSpeedZ = Mathf.Lerp(2f * Instance.Scale, maxSpeedZ, lerpPosition);
         return false;
     }
+
     private void Awake()
     {
         Instance = this;
@@ -292,15 +295,11 @@ public class PlayerScaleController : ScaleController
 
     private void Update()
     {
-        if (ModMain.Instance.GetConfigSetting<bool>("UseCustomPlayerScale"))
+        if (ModMain.HikersModAPI == null)
         {
-            targetScale = ModMain.Instance.GetConfigSetting<float>("PlayerScale");
-            Locator.GetPlayerCamera().nearClipPlane = Mathf.Min(0.1f, 0.1f * Scale);
-
             PlayerCharacterController player = GetComponent<PlayerCharacterController>();
             JetpackThrusterModel jetpack = GetComponent<JetpackThrusterModel>();
-            if (ModMain.HikersModAPI != null) return;
-            else if (ModMain.Instance.GetConfigSetting<bool>("UseScaledPlayerAttributes") && Scale != 1)
+            if (ModMain.Instance.GetConfigSetting<bool>("UseScaledPlayerAttributes"))
             {
                 player._runSpeed = 6 * Scale;
                 player._strafeSpeed = 4 * Scale;
@@ -329,7 +328,10 @@ public class PlayerScaleController : ScaleController
     {
         if (Scale != targetScale)
         {
-            transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one * targetScale, 0.1f);
+            transform.localScale = Vector3.MoveTowards(transform.localScale, Vector3.Lerp(transform.localScale, Vector3.one * targetScale, 0.1f), Time.deltaTime * 5);
+            if (Scale > targetScale - 0.01f) Scale = targetScale;
+            Locator.GetPlayerCamera().nearClipPlane = Mathf.Min(0.1f, 0.1f * Scale);
+            ModMain.HikersModAPI?.UpdateConfig();
         }
     }
 
@@ -348,11 +350,13 @@ public class PlayerScaleController : ScaleController
 }
 
 /*      
+ *      
  *  ISSUES
  *  - Footstep particles stay huge when you shrink back down
  *  - player jump curve slowdown doesn't scale
  *  - camera is in wrong place in most attach points
  *  - flashlight distance doesn't scale
  *  - freefall anim floats probably don't scale
+ *  - can't slow walk at ~3+ scale
  *  
  */
