@@ -23,6 +23,103 @@ public class PlayerScaleController : ScaleController
         }
     }
 
+    public override void SetTargetScale(float scale)
+    {
+        base.SetTargetScale(scale);
+        ModMain.HikersModAPI?.UpdateConfig();
+    }
+
+    protected override void Awake()
+    {
+        base.Awake();
+        Instance = this;
+    }
+
+    private void Update()
+    {
+        if (OWInput.IsInputMode(InputMode.Character) && ModMain.Instance.GetConfigSetting<bool>("UseCustomPlayerScale") && ModMain.Instance.GetConfigSetting<bool>("UseScaleHotkeys"))
+        {
+            if (Keyboard.current[Key.Comma].wasPressedThisFrame)
+            {
+                float newScale = ModMain.Instance.GetConfigSetting<float>("PlayerScale") / 2;
+                ModMain.Instance.SetConfigSetting("PlayerScale", newScale);
+                SetTargetScale(newScale);
+            }
+
+            if (Keyboard.current[Key.Period].wasPressedThisFrame)
+            {
+                float newScale = ModMain.Instance.GetConfigSetting<float>("PlayerScale") * 2;
+                ModMain.Instance.SetConfigSetting("PlayerScale", newScale);
+                SetTargetScale(newScale);
+            }
+
+            if (Keyboard.current[Key.Slash].wasPressedThisFrame)
+            {
+                float newScale = 1;
+                ModMain.Instance.SetConfigSetting("PlayerScale", newScale);
+                SetTargetScale(newScale);
+            }
+        }
+
+        if (ModMain.HikersModAPI == null)
+        {
+            PlayerCharacterController player = GetComponent<PlayerCharacterController>();
+            JetpackThrusterModel jetpack = GetComponent<JetpackThrusterModel>();
+            if (ModMain.Instance.GetConfigSetting<bool>("ScalePlayerSpeed"))
+            {
+                player._runSpeed = 6 * Scale;
+                player._strafeSpeed = 4 * Scale;
+                player._walkSpeed = 3 * Scale;
+                player._airSpeed = 3 * Scale;
+                player._acceleration = 0.5f * Scale;
+                player._airAcceleration = 0.09f * Scale;
+                player._minJumpSpeed = 3 * Scale;
+                player._maxJumpSpeed = 7 * Scale;
+            }
+            else
+            {
+                player._runSpeed = 6;
+                player._strafeSpeed = 4;
+                player._walkSpeed = 3;
+                player._airSpeed = 3;
+                player._acceleration = 0.5f;
+                player._airAcceleration = 0.09f;
+                player._minJumpSpeed = 3;
+                player._maxJumpSpeed = 7;
+            }
+        }
+    }
+
+    protected override void FixedUpdate()
+    {
+        if (!ModMain.Instance.GetConfigSetting<bool>("UseCustomPlayerScale") && TargetScale != s_defaultScale)
+        {
+            SetTargetScale(s_defaultScale);
+        }
+
+        base.FixedUpdate();
+
+        if (Scale != TargetScale)
+        {
+            Locator.GetPlayerCamera().nearClipPlane = Mathf.Min(0.1f, 0.1f * Scale);
+        }
+    }
+
+    private void LateUpdate()
+    {
+        AnimSpeed = 1f / Instance.Scale;
+        if (ModMain.HikersModAPI == null)
+        {
+            AnimSpeed = Mathf.Max(Mathf.Sqrt(Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude * AnimSpeed / 6f), 1f);
+            if (!ModMain.Instance.ModHelper.Interaction.ModExists("Owen_013.FirstPersonPresence"))
+            {
+                Locator.GetPlayerController().GetComponentInChildren<Animator>().speed = AnimSpeed;
+            }
+        }
+    }
+
+    // PATCHES
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.CastForGrounded))]
     private static bool PlayerCharacterController_CastForGrounded(PlayerCharacterController __instance)
@@ -307,101 +404,6 @@ public class PlayerScaleController : ScaleController
         if (ModMain.Instance.GetConfigSetting<bool>("ScalePlayerImpacts"))
         {
             __result *= Mathf.Max(Instance.Scale, Instance.TargetScale);
-        }
-    }
-
-    public override void SetTargetScale(float scale)
-    {
-        base.SetTargetScale(scale);
-        ModMain.HikersModAPI?.UpdateConfig();
-    }
-
-    protected override void Awake()
-    {
-        base.Awake();
-        Instance = this;
-    }
-
-    private void Update()
-    {
-        if (OWInput.IsInputMode(InputMode.Character) && ModMain.Instance.GetConfigSetting<bool>("UseCustomPlayerScale") && ModMain.Instance.GetConfigSetting<bool>("UseScaleHotkeys"))
-        {
-            if (Keyboard.current[Key.Comma].wasPressedThisFrame)
-            {
-                float newScale = ModMain.Instance.GetConfigSetting<float>("PlayerScale") / 2;
-                ModMain.Instance.SetConfigSetting("PlayerScale", newScale);
-                SetTargetScale(newScale);
-            }
-
-            if (Keyboard.current[Key.Period].wasPressedThisFrame)
-            {
-                float newScale = ModMain.Instance.GetConfigSetting<float>("PlayerScale") * 2;
-                ModMain.Instance.SetConfigSetting("PlayerScale", newScale);
-                SetTargetScale(newScale);
-            }
-
-            if (Keyboard.current[Key.Slash].wasPressedThisFrame)
-            {
-                float newScale = 1;
-                ModMain.Instance.SetConfigSetting("PlayerScale", newScale);
-                SetTargetScale(newScale);
-            }
-        }
-
-        if (ModMain.HikersModAPI == null)
-        {
-            PlayerCharacterController player = GetComponent<PlayerCharacterController>();
-            JetpackThrusterModel jetpack = GetComponent<JetpackThrusterModel>();
-            if (ModMain.Instance.GetConfigSetting<bool>("ScalePlayerSpeed"))
-            {
-                player._runSpeed = 6 * Scale;
-                player._strafeSpeed = 4 * Scale;
-                player._walkSpeed = 3 * Scale;
-                player._airSpeed = 3 * Scale;
-                player._acceleration = 0.5f * Scale;
-                player._airAcceleration = 0.09f * Scale;
-                player._minJumpSpeed = 3 * Scale;
-                player._maxJumpSpeed = 7 * Scale;
-            }
-            else
-            {
-                player._runSpeed = 6;
-                player._strafeSpeed = 4;
-                player._walkSpeed = 3;
-                player._airSpeed = 3;
-                player._acceleration = 0.5f;
-                player._airAcceleration = 0.09f;
-                player._minJumpSpeed = 3;
-                player._maxJumpSpeed = 7;
-            }
-        }
-    }
-
-    protected override void FixedUpdate()
-    {
-        if (!ModMain.Instance.GetConfigSetting<bool>("UseCustomPlayerScale") && TargetScale != s_defaultScale)
-        {
-            SetTargetScale(s_defaultScale);
-        }
-
-        base.FixedUpdate();
-
-        if (Scale != TargetScale)
-        {
-            Locator.GetPlayerCamera().nearClipPlane = Mathf.Min(0.1f, 0.1f * Scale);
-        }
-    }
-
-    private void LateUpdate()
-    {
-        AnimSpeed = 1f / Instance.Scale;
-        if (ModMain.HikersModAPI == null)
-        {
-            AnimSpeed = Mathf.Max(Mathf.Sqrt(Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude * AnimSpeed / 6f), 1f);
-            if (!ModMain.Instance.ModHelper.Interaction.ModExists("Owen_013.FirstPersonPresence"))
-            {
-                Locator.GetPlayerController().GetComponentInChildren<Animator>().speed = AnimSpeed;
-            }
         }
     }
 }

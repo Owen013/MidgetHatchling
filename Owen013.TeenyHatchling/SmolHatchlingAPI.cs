@@ -20,10 +20,23 @@ public class SmolHatchlingAPI
     /// If set before the first update, the player will be this size when they start.
     /// If set after, the player will slowly ease to this size.
     /// </summary>
-    /// <param name="defaultScale">The default scale the player should be.</param>
-    public void SetPlayerDefaultScale(float defaultScale)
+    /// <param name="scale">The default scale the player should be.</param>
+    public void SetPlayerDefaultScale(float scale)
     {
-        PlayerScaleController.s_defaultScale = defaultScale;
+        PlayerScaleController.s_defaultScale = scale;
+    }
+
+    /// <summary>
+    /// Sets the default scale of the player and then instantly snaps it to a given size.
+    /// </summary>
+    /// <param name="scale">The scale you want to snap the player to.</param>
+    public void SetPlayerScaleInstantly(float scale)
+    {
+        PlayerScaleController.s_defaultScale = scale;
+        if (PlayerScaleController.Instance != null)
+        {
+            PlayerScaleController.Instance.Scale = scale;
+        }
     }
 
     /// <summary>
