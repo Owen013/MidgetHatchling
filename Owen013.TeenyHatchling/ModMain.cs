@@ -4,6 +4,8 @@ using OWML.ModHelper;
 using SmolHatchling.Components;
 using SmolHatchling.Interfaces;
 using System.Reflection;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace SmolHatchling;
 
@@ -12,6 +14,8 @@ public class ModMain : ModBehaviour
     public static ModMain Instance { get; private set; }
 
     public static IHikersMod HikersModAPI { get; private set; }
+
+    private float _resetButtonHoldTime;
 
     public override object GetApi()
     {
@@ -65,5 +69,26 @@ public class ModMain : ModBehaviour
         }
 
         Print($"Smol Hatchling is ready to go!", MessageType.Success);
+    }
+
+    private void Update()
+    {
+        if (Keyboard.current[Key.Slash].isPressed)
+        {
+            if (_resetButtonHoldTime >= 5f)
+            {
+                SetConfigSetting("UseCustomPlayerScale", false);
+                _resetButtonHoldTime = 0;
+                Print("'Use Custom Player Scale' disabled");
+            }
+            else
+            {
+                _resetButtonHoldTime += Time.deltaTime;
+            }
+        }
+        else
+        {
+            _resetButtonHoldTime = 0;
+        }
     }
 }
