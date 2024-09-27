@@ -7,7 +7,7 @@ namespace SmolHatchling;
 public class SmolHatchlingAPI
 {
     /// <summary>
-    /// Returns the CURRENT scale of the player.
+    /// Returns the current scale of the player.
     /// </summary>
     public float GetPlayerScale()
     {
@@ -16,7 +16,18 @@ public class SmolHatchlingAPI
     }
 
     /// <summary>
-    /// Returns the FINAL scale that the player is easing towards
+    /// The default scale of the player.
+    /// If set before the first update, the player will be this size when they start.
+    /// If set after, the player will slowly ease to this size.
+    /// </summary>
+    /// <param name="defaultScale">The default scale the player should be.</param>
+    public void SetPlayerDefaultScale(float defaultScale)
+    {
+        PlayerScaleController.s_defaultScale = defaultScale;
+    }
+
+    /// <summary>
+    /// Returns the final scale that the player is easing towards.
     /// </summary>
     public float GetPlayerTargetScale()
     {
@@ -32,7 +43,10 @@ public class SmolHatchlingAPI
         return PlayerScaleController.AnimSpeed;
     }
 
-    public bool UseScaledPlayerAttributes()
+    /// <summary>
+    /// Returns true if Smol Hatchling is scaling the player's speed to match their size.
+    /// </summary>
+    public bool UseScaledPlayerSpeed()
     {
         return ModMain.Instance.GetConfigSetting<bool>("ScalePlayerSpeed");
     }
@@ -56,5 +70,11 @@ public class SmolHatchlingAPI
     {
         ModMain.Instance.Print("GetAnimSpeed() is deprecated. Use GetPlayerAnimSpeed() instead.", OWML.Common.MessageType.Debug);
         return PlayerScaleController.AnimSpeed;
+    }
+
+    [Obsolete]
+    public bool UseScaledPlayerAttributes()
+    {
+        return ModMain.Instance.GetConfigSetting<bool>("ScalePlayerSpeed");
     }
 }

@@ -9,7 +9,7 @@
     },
     "UseCustomPlayerScale": {
       "title": "Use Custom Player Scale",
-      "tooltip": "Overrides the player Scale to the value below.",
+      "tooltip": "Overrides the player Scale to the value below. If you get softlocked because of the player's size, hold '/' for 5 seconds to disable.",
       "type": "toggle",
       "value": false
     },
@@ -21,7 +21,7 @@
     },
     "UseScaleHotkeys": {
       "title": "Use Scale Hotkeys",
-      "tooltip": "",
+      "tooltip": "When enabled, you can press '<' to half the player's size, '>' to double it, and '/' to return to normal.",
       "type": "toggle",
       "value": true
     },

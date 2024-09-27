@@ -11,23 +11,17 @@ public class PlayerScaleController : ScaleController
 
     public static float AnimSpeed { get; private set; }
 
+    public static float s_defaultScale = 1;
+
     public override float Scale
     {
-        get
-        {
-            return transform.localScale.x;
-        }
-
         set
         {
             transform.localScale = Vector3.one * value;
-            TargetScale = value;
+            SetTargetScale(value);
             Locator.GetPlayerCamera().nearClipPlane = Mathf.Min(0.1f, 0.1f * Scale);
-            ModMain.HikersModAPI?.UpdateConfig();
         }
     }
-
-    public float TargetScale { get; private set; }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.CastForGrounded))]
@@ -244,13 +238,13 @@ public class PlayerScaleController : ScaleController
             if (ModMain.Instance.GetConfigSetting<bool>("UseCustomPlayerScale"))
             {
                 scaleController.Scale = ModMain.Instance.GetConfigSetting<float>("PlayerScale");
-                __instance.transform.position += __instance.GetLocalUpDirection() * (-1 + Instance.Scale);
             }
             else
             {
-                Instance.TargetScale = 1;
+                scaleController.Scale = s_defaultScale;
             }
 
+            __instance.transform.position += __instance.GetLocalUpDirection() * (-1 + Instance.Scale);
             ModMain.HikersModAPI?.UpdateConfig();
         });
     }
@@ -316,14 +310,15 @@ public class PlayerScaleController : ScaleController
         }
     }
 
-    public void EaseToScale(float scale)
+    public override void SetTargetScale(float scale)
     {
-        TargetScale = scale;
+        base.SetTargetScale(scale);
         ModMain.HikersModAPI?.UpdateConfig();
     }
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         Instance = this;
     }
 
@@ -335,21 +330,21 @@ public class PlayerScaleController : ScaleController
             {
                 float newScale = ModMain.Instance.GetConfigSetting<float>("PlayerScale") / 2;
                 ModMain.Instance.SetConfigSetting("PlayerScale", newScale);
-                EaseToScale(newScale);
+                SetTargetScale(newScale);
             }
 
             if (Keyboard.current[Key.Period].wasPressedThisFrame)
             {
                 float newScale = ModMain.Instance.GetConfigSetting<float>("PlayerScale") * 2;
                 ModMain.Instance.SetConfigSetting("PlayerScale", newScale);
-                EaseToScale(newScale);
+                SetTargetScale(newScale);
             }
 
             if (Keyboard.current[Key.Slash].wasPressedThisFrame)
             {
                 float newScale = 1;
                 ModMain.Instance.SetConfigSetting("PlayerScale", newScale);
-                EaseToScale(newScale);
+                SetTargetScale(newScale);
             }
         }
 
@@ -382,12 +377,17 @@ public class PlayerScaleController : ScaleController
         }
     }
 
-    private void FixedUpdate()
+    protected override void FixedUpdate()
     {
+        if (!ModMain.Instance.GetConfigSetting<bool>("UseCustomPlayerScale") && TargetScale != s_defaultScale)
+        {
+            SetTargetScale(s_defaultScale);
+        }
+
+        base.FixedUpdate();
+
         if (Scale != TargetScale)
         {
-            transform.localScale = Vector3.MoveTowards(transform.localScale, Vector3.Lerp(transform.localScale, Vector3.one * TargetScale, 0.1f), Time.deltaTime * Scale);
-            if (Mathf.Abs(Scale - TargetScale) < Scale * 0.005f) Scale = TargetScale;
             Locator.GetPlayerCamera().nearClipPlane = Mathf.Min(0.1f, 0.1f * Scale);
         }
     }
@@ -411,7 +411,6 @@ public class PlayerScaleController : ScaleController
  *  ISSUES
  *  - Footstep particles stay huge when you shrink back down
  *  - player jump curve slowdown doesn't scale
- *  - camera is in wrong place in most attach points
  *  - flashlight distance doesn't scale
  *  - freefall anim floats probably don't scale
  *  - can't slow walk at ~3+ scale

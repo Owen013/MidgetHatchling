@@ -29,11 +29,11 @@ public class ModMain : ModBehaviour
         {
             if (GetConfigSetting<bool>("UseCustomPlayerScale"))
             {
-                PlayerScaleController.Instance.EaseToScale(GetConfigSetting<float>("PlayerScale"));
+                PlayerScaleController.Instance.SetTargetScale(GetConfigSetting<float>("PlayerScale"));
             }
             else
             {
-                PlayerScaleController.Instance.EaseToScale(1);
+                PlayerScaleController.Instance.SetTargetScale(PlayerScaleController.s_defaultScale);
             }
         }
     }
@@ -78,12 +78,16 @@ public class ModMain : ModBehaviour
             if (_resetButtonHoldTime >= 5f)
             {
                 SetConfigSetting("UseCustomPlayerScale", false);
+                if (PlayerScaleController.Instance != null)
+                {
+                    PlayerScaleController.Instance.SetTargetScale(PlayerScaleController.s_defaultScale);
+                }
                 _resetButtonHoldTime = 0;
                 Print("'Use Custom Player Scale' disabled");
             }
             else
             {
-                _resetButtonHoldTime += Time.deltaTime;
+                _resetButtonHoldTime += Time.unscaledDeltaTime;
             }
         }
         else
