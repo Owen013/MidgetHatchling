@@ -17,6 +17,7 @@ public class PlayerScaleController : ScaleController
         {
             return transform.localScale.x;
         }
+
         set
         {
             transform.localScale = Vector3.one * value;
@@ -40,7 +41,7 @@ public class PlayerScaleController : ScaleController
         Vector3 localUpDirection = __instance._owRigidbody.GetLocalUpDirection();
         float radius = 0.46f;
         float maxDistance = (wasGrounded ? 0.1f : 0.06f) * time + (1f - radius);
-        float scale = __instance.GetComponent<PlayerScaleController>().Scale;
+        float scale = Instance.Scale;
         int numSphereCastHits = Physics.SphereCastNonAlloc(__instance._owRigidbody.GetPosition(), radius * scale, -localUpDirection, __instance._raycastHits, maxDistance * scale, OWLayerMask.groundMask, QueryTriggerInteraction.Ignore);
         RaycastHit raycastHit = default(RaycastHit);
         bool hasValidGroundedHit = false;
@@ -220,6 +221,18 @@ public class PlayerScaleController : ScaleController
         return false;
     }
 
+    // this prefix is added manually if Hiker's Mod is not installed
+    internal static bool DreamLanternItem_OverrideMaxRunSpeed(ref float maxSpeedX, ref float maxSpeedZ, DreamLanternItem __instance)
+    {
+        if (!ModMain.Instance.GetConfigSetting<bool>("ScalePlayerSpeed")) return true;
+
+        float lerpPosition = 1f - __instance._lanternController.GetFocus();
+        lerpPosition *= lerpPosition;
+        maxSpeedX = Mathf.Lerp(2f * Instance.Scale, maxSpeedX, lerpPosition);
+        maxSpeedZ = Mathf.Lerp(2f * Instance.Scale, maxSpeedZ, lerpPosition);
+        return false;
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerBody), nameof(PlayerBody.Awake))]
     private static void AddToPlayerBody(PlayerBody __instance)
@@ -231,7 +244,7 @@ public class PlayerScaleController : ScaleController
             if (ModMain.Instance.GetConfigSetting<bool>("UseCustomPlayerScale"))
             {
                 scaleController.Scale = ModMain.Instance.GetConfigSetting<float>("PlayerScale");
-                __instance.transform.position += __instance.GetLocalUpDirection() * (-1 + 1 * Instance.Scale);
+                __instance.transform.position += __instance.GetLocalUpDirection() * (-1 + Instance.Scale);
             }
             else
             {
@@ -242,9 +255,28 @@ public class PlayerScaleController : ScaleController
         });
     }
 
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(PlayerAttachPoint), nameof(PlayerAttachPoint.AttachPlayer))]
+    private static void EditAttachOffset(PlayerAttachPoint __instance)
+    {
+        if (__instance.name == "CockpitAttachPoint")
+        {
+            Vector3 defaultAttachPoint = new Vector3(0f, 0.3353f, 4.2307f);
+            __instance.transform.parent.GetComponentInChildren<ShipCockpitController>()._origAttachPointLocalPos = defaultAttachPoint + new Vector3(0, 0.8496f * (1 - Instance.TargetScale), 0.15f * (1 - Instance.TargetScale));
+        }
+        else if (__instance.name == "ModelRocketStation_AttachPoint" || __instance.GetComponentInParent<Elevator>())
+        {
+            __instance._attachOffset = new Vector3(0, -1 + Instance.TargetScale);
+        }
+        else if (__instance.GetComponentInParent<StationaryProbeLauncher>() || __instance.GetComponentInParent<ShipLogController>())
+        {
+            __instance._attachOffset = new Vector3(0, 0.8496f * (1 - Instance.TargetScale), 0.15f * (1 - Instance.TargetScale));
+        }
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GhostGrabController), nameof(GhostGrabController.OnStartLiftPlayer))]
-    public static void GhostLiftedPlayer(GhostGrabController __instance)
+    private static void GhostLiftedPlayer(GhostGrabController __instance)
     {
         // Offset attachment so that camera is where it normally is
         __instance._attachPoint._attachOffset = new Vector3(0, 0.8496f * (1 - Instance.Scale), 0.15f * (1 - Instance.Scale));
@@ -252,7 +284,7 @@ public class PlayerScaleController : ScaleController
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerAnimController), nameof(PlayerAnimController.LateUpdate))]
-    public static void SetRunAnimFloats(PlayerAnimController __instance)
+    private static void SetRunAnimFloats(PlayerAnimController __instance)
     {
         Vector3 groundVelocity = Vector3.zero;
         if (!PlayerState.IsAttached())
@@ -276,24 +308,12 @@ public class PlayerScaleController : ScaleController
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.GetMinImpactSpeed))]
     [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.GetMaxImpactSpeed))]
-    public static void GetImpactSpeed(ref float __result)
+    private static void GetImpactSpeed(ref float __result)
     {
         if (ModMain.Instance.GetConfigSetting<bool>("ScalePlayerImpacts"))
         {
             __result *= Mathf.Max(Instance.Scale, Instance.TargetScale);
         }
-    }
-
-    // this patch is added manually if Hiker's Mod is not installed
-    public static bool OverrideMaxRunSpeed(ref float maxSpeedX, ref float maxSpeedZ, DreamLanternItem __instance)
-    {
-        if (!ModMain.Instance.GetConfigSetting<bool>("ScalePlayerSpeed")) return true;
-
-        float lerpPosition = 1f - __instance._lanternController.GetFocus();
-        lerpPosition *= lerpPosition;
-        maxSpeedX = Mathf.Lerp(2f * Instance.Scale, maxSpeedX, lerpPosition);
-        maxSpeedZ = Mathf.Lerp(2f * Instance.Scale, maxSpeedZ, lerpPosition);
-        return false;
     }
 
     public void EaseToScale(float scale)
@@ -309,7 +329,7 @@ public class PlayerScaleController : ScaleController
 
     private void Update()
     {
-        if (ModMain.Instance.GetConfigSetting<bool>("UseCustomPlayerScale") && ModMain.Instance.GetConfigSetting<bool>("UseScaleHotkeys"))
+        if (OWInput.IsInputMode(InputMode.Character) && ModMain.Instance.GetConfigSetting<bool>("UseCustomPlayerScale") && ModMain.Instance.GetConfigSetting<bool>("UseScaleHotkeys"))
         {
             if (Keyboard.current[Key.Comma].wasPressedThisFrame)
             {

@@ -6,18 +6,27 @@ namespace SmolHatchling;
 
 public class SmolHatchlingAPI
 {
+    /// <summary>
+    /// Returns the CURRENT scale of the player.
+    /// </summary>
     public float GetPlayerScale()
     {
         if (PlayerScaleController.Instance == null) return 1;
         return PlayerScaleController.Instance.Scale;
     }
 
+    /// <summary>
+    /// Returns the FINAL scale that the player is easing towards
+    /// </summary>
     public float GetPlayerTargetScale()
     {
         if (PlayerScaleController.Instance == null) return 1;
         return PlayerScaleController.Instance.TargetScale;
     }
 
+    /// <summary>
+    /// Returns the animation speed multiplier.
+    /// </summary>
     public float GetPlayerAnimSpeed()
     {
         return PlayerScaleController.AnimSpeed;

@@ -61,7 +61,7 @@ public class ModMain : ModBehaviour
 
         if (ModHelper.Interaction.ModExists("Owen013.MovementMod"))
         {
-            ModHelper.HarmonyHelper.AddPrefix<DreamLanternItem>(nameof(DreamLanternItem.OverrideMaxRunSpeed), typeof(PlayerScaleController), nameof(PlayerScaleController.OverrideMaxRunSpeed));
+            ModHelper.HarmonyHelper.AddPrefix<DreamLanternItem>(nameof(DreamLanternItem.OverrideMaxRunSpeed), typeof(PlayerScaleController), nameof(PlayerScaleController.DreamLanternItem_OverrideMaxRunSpeed));
         }
 
         Print($"Smol Hatchling is ready to go!", MessageType.Success);
