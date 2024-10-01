@@ -17,6 +17,12 @@ public class ModMain : ModBehaviour
 
     public static bool IsImmersionInstalled;
 
+    public static void Print(string text, MessageType messageType = MessageType.Message)
+    {
+        if (Instance == null | Instance.ModHelper == null) return;
+        Instance.ModHelper.Console.WriteLine(text, messageType);
+    }
+
     public override object GetApi()
     {
         return new SmolHatchlingAPI();
@@ -26,11 +32,6 @@ public class ModMain : ModBehaviour
     {
         base.Configure(config);
         Config.Configure();
-    }
-
-    public void Print(string text, MessageType messageType = MessageType.Message)
-    {
-        ModHelper.Console.WriteLine(text, messageType);
     }
 
     private void Awake()

@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -58,7 +57,7 @@ public class PlayerScaleController : ScaleController
                 Config.SetConfigSetting("UseCustomPlayerScale", false);
                 EaseToScale(defaultScale);
                 _resetButtonHeldTime = 0;
-                ModMain.Instance.Print("'Use Custom Player Scale' disabled");
+                ModMain.Print("'Use Custom Player Scale' disabled");
             }
             else
             {
@@ -95,6 +94,21 @@ public class PlayerScaleController : ScaleController
                 EaseToScale(newScale);
             }
         }
+    }
+
+    protected override void FixedUpdate()
+    {
+        if (!Config.UseCustomPlayerScale && targetScale != defaultScale)
+        {
+            EaseToScale(defaultScale);
+        }
+
+        base.FixedUpdate();
+
+        if (scale != targetScale)
+        {
+            Locator.GetPlayerCamera().nearClipPlane = Mathf.Min(0.1f, 0.1f * scale);
+        }
 
         if (ModMain.HikersModAPI == null)
         {
@@ -121,21 +135,6 @@ public class PlayerScaleController : ScaleController
                 player._minJumpSpeed = 3;
                 player._maxJumpSpeed = 7;
             }
-        }
-    }
-
-    protected override void FixedUpdate()
-    {
-        if (!Config.UseCustomPlayerScale && targetScale != defaultScale)
-        {
-            EaseToScale(defaultScale);
-        }
-
-        base.FixedUpdate();
-
-        if (scale != targetScale)
-        {
-            Locator.GetPlayerCamera().nearClipPlane = Mathf.Min(0.1f, 0.1f * scale);
         }
     }
 

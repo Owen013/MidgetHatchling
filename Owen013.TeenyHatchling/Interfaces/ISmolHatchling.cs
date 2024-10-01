@@ -1,4 +1,6 @@
-﻿namespace SmolHatchling.Interfaces;
+﻿using UnityEngine;
+
+namespace SmolHatchling.Interfaces;
 
 public interface ISmolHatchling
 {
@@ -35,4 +37,11 @@ public interface ISmolHatchling
     /// Returns true if Smol Hatchling is scaling the player's speed to match their size.
     /// </summary>
     public bool UseScaledPlayerSpeed();
+
+    /// <summary>
+    /// Resizes a GameObject using its ScaleController. If the GameObject does not have a ScaleController, one will be created.
+    /// </summary>
+    /// <param name="gameObject">The GameObject to resize.</param>
+    /// <param name="scale">The size you want the GameObject to be.</param>
+    public void SetGameObjectScale(GameObject gameObject, float scale);
 }
