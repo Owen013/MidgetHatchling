@@ -4,7 +4,7 @@ namespace SmolHatchling.Components;
 
 public class ScaleController : MonoBehaviour
 {
-    public virtual float scale
+    public virtual float Scale
     {
         get
         {
@@ -14,28 +14,28 @@ public class ScaleController : MonoBehaviour
         set
         {
             transform.localScale = Vector3.one * value;
-            targetScale = value;
+            TargetScale = value;
         }
     }
 
-    public float targetScale { get; protected set; }
+    public float TargetScale { get; protected set; }
 
     public virtual void EaseToScale(float scale)
     {
-        targetScale = scale;
+        TargetScale = scale;
     }
 
     protected virtual void Awake()
     {
-        targetScale = scale;
+        TargetScale = Scale;
     }
 
     protected virtual void FixedUpdate()
     {
-        if (scale != targetScale)
+        if (Scale != TargetScale)
         {
-            transform.localScale = Vector3.MoveTowards(transform.localScale, Vector3.Lerp(transform.localScale, Vector3.one * targetScale, 0.1f), Time.deltaTime * scale);
-            if (Mathf.Abs(scale - targetScale) < scale * 0.005f) scale = targetScale;
+            transform.localScale = Vector3.MoveTowards(transform.localScale, Vector3.Lerp(transform.localScale, Vector3.one * TargetScale, 0.1f), Time.deltaTime * Scale);
+            if (Mathf.Abs(Scale - TargetScale) < Scale * 0.005f) Scale = TargetScale;
         }
     }
 }

@@ -9,7 +9,7 @@
     },
     "UseCustomPlayerScale": {
       "title": "Use Custom Player Scale",
-      "tooltip": "Overrides the player Scale to the value below. If you get softlocked because of the player's size, hold '/' for 5 seconds to disable.",
+      "tooltip": "Overrides the player scale to the value below. If you get softlocked because of the player's size, hold '/' for 5 seconds to disable.",
       "type": "toggle",
       "value": false
     },

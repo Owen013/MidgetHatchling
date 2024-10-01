@@ -13,8 +13,8 @@ public class AnglerfishScaleController : ScaleController
     protected override void FixedUpdate()
     {
         base.FixedUpdate();
-        _anglerfishController._acceleration = 40 * scale;
-        _anglerfishController._chaseSpeed = 75 * scale;
-        _anglerfishController._investigateSpeed = 20 * scale;
+        _anglerfishController._acceleration = 40 * Scale;
+        _anglerfishController._chaseSpeed = 75 * Scale;
+        _anglerfishController._investigateSpeed = 20 * Scale;
     }
 }

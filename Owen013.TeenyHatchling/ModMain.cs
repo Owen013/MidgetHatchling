@@ -4,8 +4,6 @@ using OWML.ModHelper;
 using SmolHatchling.Components;
 using SmolHatchling.Interfaces;
 using System.Reflection;
-using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace SmolHatchling;
 
@@ -19,7 +17,7 @@ public class ModMain : ModBehaviour
 
     public static void Print(string text, MessageType messageType = MessageType.Message)
     {
-        if (Instance == null | Instance.ModHelper == null) return;
+        if (Instance == null || Instance.ModHelper == null) return;
         Instance.ModHelper.Console.WriteLine(text, messageType);
     }
 

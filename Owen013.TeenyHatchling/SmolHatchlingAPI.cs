@@ -12,7 +12,7 @@ public class SmolHatchlingAPI
     public float GetPlayerScale()
     {
         if (PlayerScaleController.Instance == null) return 1;
-        return PlayerScaleController.Instance.scale;
+        return PlayerScaleController.Instance.Scale;
     }
 
     /// <summary>
@@ -23,7 +23,7 @@ public class SmolHatchlingAPI
     /// <param name="scale">The default scale the player should be.</param>
     public void SetPlayerDefaultScale(float scale)
     {
-        PlayerScaleController.defaultScale = scale;
+        PlayerScaleController.DefaultScale = scale;
     }
 
     /// <summary>
@@ -32,10 +32,10 @@ public class SmolHatchlingAPI
     /// <param name="scale">The scale you want to snap the player to.</param>
     public void SetPlayerScaleInstantly(float scale)
     {
-        PlayerScaleController.defaultScale = scale;
+        PlayerScaleController.DefaultScale = scale;
         if (PlayerScaleController.Instance != null)
         {
-            PlayerScaleController.Instance.scale = scale;
+            PlayerScaleController.Instance.Scale = scale;
         }
     }
 
@@ -45,7 +45,7 @@ public class SmolHatchlingAPI
     public float GetPlayerTargetScale()
     {
         if (PlayerScaleController.Instance == null) return 1;
-        return PlayerScaleController.Instance.targetScale;
+        return PlayerScaleController.Instance.TargetScale;
     }
 
     /// <summary>
@@ -94,7 +94,7 @@ public class SmolHatchlingAPI
         }
         else
         {
-            scaleController.scale = scale;
+            scaleController.Scale = scale;
         }
     }
 
@@ -102,14 +102,14 @@ public class SmolHatchlingAPI
     public Vector3 GetTargetScale()
     {
         ModMain.Print("GetTargetScale() is deprecated. Use GetPlayerScale() instead.", OWML.Common.MessageType.Debug);
-        return Vector3.one * PlayerScaleController.Instance.targetScale;
+        return Vector3.one * PlayerScaleController.Instance.TargetScale;
     }
 
     [Obsolete]
     public Vector3 GetCurrentScale()
     {
         ModMain.Print("GetCurrentScale() is deprecated. Use GetPlayerScale() instead.", OWML.Common.MessageType.Debug);
-        return Vector3.one * PlayerScaleController.Instance.scale;
+        return Vector3.one * PlayerScaleController.Instance.Scale;
     }
 
     [Obsolete]
