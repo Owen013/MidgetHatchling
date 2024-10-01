@@ -12,7 +12,7 @@ public class SmolHatchlingAPI
     public float GetPlayerScale()
     {
         if (PlayerScaleController.Instance == null) return 1;
-        return PlayerScaleController.Instance.Scale;
+        return PlayerScaleController.Instance.scale;
     }
 
     /// <summary>
@@ -23,7 +23,7 @@ public class SmolHatchlingAPI
     /// <param name="scale">The default scale the player should be.</param>
     public void SetPlayerDefaultScale(float scale)
     {
-        PlayerScaleController.s_defaultScale = scale;
+        PlayerScaleController.defaultScale = scale;
     }
 
     /// <summary>
@@ -32,10 +32,10 @@ public class SmolHatchlingAPI
     /// <param name="scale">The scale you want to snap the player to.</param>
     public void SetPlayerScaleInstantly(float scale)
     {
-        PlayerScaleController.s_defaultScale = scale;
+        PlayerScaleController.defaultScale = scale;
         if (PlayerScaleController.Instance != null)
         {
-            PlayerScaleController.Instance.Scale = scale;
+            PlayerScaleController.Instance.scale = scale;
         }
     }
 
@@ -45,7 +45,7 @@ public class SmolHatchlingAPI
     public float GetPlayerTargetScale()
     {
         if (PlayerScaleController.Instance == null) return 1;
-        return PlayerScaleController.Instance.TargetScale;
+        return PlayerScaleController.Instance.targetScale;
     }
 
     /// <summary>
@@ -61,21 +61,21 @@ public class SmolHatchlingAPI
     /// </summary>
     public bool UseScaledPlayerSpeed()
     {
-        return ModMain.Instance.GetConfigSetting<bool>("ScalePlayerSpeed");
+        return Config.UseScaledPlayerSpeed;
     }
 
     [Obsolete]
     public Vector3 GetTargetScale()
     {
         ModMain.Instance.Print("GetTargetScale() is deprecated. Use GetPlayerScale() instead.", OWML.Common.MessageType.Debug);
-        return Vector3.one * PlayerScaleController.Instance.TargetScale;
+        return Vector3.one * PlayerScaleController.Instance.targetScale;
     }
 
     [Obsolete]
     public Vector3 GetCurrentScale()
     {
         ModMain.Instance.Print("GetCurrentScale() is deprecated. Use GetPlayerScale() instead.", OWML.Common.MessageType.Debug);
-        return Vector3.one * PlayerScaleController.Instance.Scale;
+        return Vector3.one * PlayerScaleController.Instance.scale;
     }
 
     [Obsolete]
@@ -88,6 +88,6 @@ public class SmolHatchlingAPI
     [Obsolete]
     public bool UseScaledPlayerAttributes()
     {
-        return ModMain.Instance.GetConfigSetting<bool>("ScalePlayerSpeed");
+        return Config.UseScaledPlayerSpeed;
     }
 }

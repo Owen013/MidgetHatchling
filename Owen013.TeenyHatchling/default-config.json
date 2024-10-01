@@ -25,13 +25,13 @@
       "type": "toggle",
       "value": true
     },
-    "ScalePlayerSpeed": {
+    "UseScaledPlayerSpeed": {
       "title": "Change Player Speed to Match Size",
       "tooltip": "Changes the speed, jump height, and acceleration of the player to match its size.",
       "type": "toggle",
       "value": true
     },
-    "ScalePlayerImpacts": {
+    "UseScaledPlayerDamage": {
       "title": "Change Player's Impact Damage to Match Size",
       "tooltip": "Changes the amount of damage you take from impacts to match your size. Larger = more resilient.",
       "type": "toggle",

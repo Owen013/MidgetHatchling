@@ -15,7 +15,7 @@ public class ModMain : ModBehaviour
 
     public static IHikersMod HikersModAPI { get; private set; }
 
-    private float _resetButtonHoldTime;
+    public static bool IsImmersionInstalled;
 
     public override object GetApi()
     {
@@ -25,27 +25,7 @@ public class ModMain : ModBehaviour
     public override void Configure(IModConfig config)
     {
         base.Configure(config);
-        if (PlayerScaleController.Instance != null)
-        {
-            if (GetConfigSetting<bool>("UseCustomPlayerScale"))
-            {
-                PlayerScaleController.Instance.SetTargetScale(GetConfigSetting<float>("PlayerScale"));
-            }
-            else
-            {
-                PlayerScaleController.Instance.SetTargetScale(PlayerScaleController.s_defaultScale);
-            }
-        }
-    }
-
-    public T GetConfigSetting<T>(string settingName)
-    {
-        return ModHelper.Config.GetSettingsValue<T>(settingName);
-    }
-
-    public void SetConfigSetting(string settingName, object value)
-    {
-        ModHelper.Config.SetSettingsValue(settingName, value);
+        Config.Configure();
     }
 
     public void Print(string text, MessageType messageType = MessageType.Message)
@@ -62,37 +42,13 @@ public class ModMain : ModBehaviour
     private void Start()
     {
         HikersModAPI = ModHelper.Interaction.TryGetModApi<IHikersMod>("Owen013.MovementMod");
-
-        if (ModHelper.Interaction.ModExists("Owen013.MovementMod"))
+        if (HikersModAPI != null)
         {
             ModHelper.HarmonyHelper.AddPrefix<DreamLanternItem>(nameof(DreamLanternItem.OverrideMaxRunSpeed), typeof(PlayerScaleController), nameof(PlayerScaleController.DreamLanternItem_OverrideMaxRunSpeed));
         }
 
-        Print($"Smol Hatchling is ready to go!", MessageType.Success);
-    }
+        IsImmersionInstalled = ModHelper.Interaction.ModExists("Owen_013.FirstPersonPresence");
 
-    private void Update()
-    {
-        if (Keyboard.current[Key.Slash].isPressed)
-        {
-            if (_resetButtonHoldTime >= 5f)
-            {
-                SetConfigSetting("UseCustomPlayerScale", false);
-                if (PlayerScaleController.Instance != null)
-                {
-                    PlayerScaleController.Instance.SetTargetScale(PlayerScaleController.s_defaultScale);
-                }
-                _resetButtonHoldTime = 0;
-                Print("'Use Custom Player Scale' disabled");
-            }
-            else
-            {
-                _resetButtonHoldTime += Time.unscaledDeltaTime;
-            }
-        }
-        else
-        {
-            _resetButtonHoldTime = 0;
-        }
+        Print($"Smol Hatchling is ready to go!", MessageType.Success);
     }
 }
