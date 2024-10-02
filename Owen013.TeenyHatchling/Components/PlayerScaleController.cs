@@ -388,23 +388,23 @@ public class PlayerScaleController : ScaleController
     {
         if (Config.UseScaledPlayerSpeed == false) return true;
 
-        float y = __instance._translationalInput.y * __instance._maxTranslationalThrust;
+        float thrustY = __instance._translationalInput.y * __instance._maxTranslationalThrust;
         if (__instance._boostActivated)
         {
             float num = 0.06666667f - Time.fixedDeltaTime * 0.5f;
             float num2 = 0f;
             if (Time.time < __instance._lastJumpTime + num)
             {
-                y = 0f;
+                thrustY = 0f;
             }
             else if (Locator.GetPlayerRulesetDetector().IsJetpackBoosterNerfed(out num2))
             {
                 float num3 = Mathf.InverseLerp(__instance._lastJumpTime + num, __instance._lastJumpTime + num2, Time.time);
-                y = __instance._boostThrust * num3;
+                thrustY = __instance._boostThrust * num3;
             }
             else
             {
-                y = __instance._boostThrust;
+                thrustY = __instance._boostThrust;
             }
             __instance._boostChargeFraction -= Time.deltaTime / __instance._boostSeconds;
             __instance._boostChargeFraction = Mathf.Clamp01(__instance._boostChargeFraction);
@@ -420,7 +420,7 @@ public class PlayerScaleController : ScaleController
             __instance._boostChargeFraction = Mathf.Clamp01(__instance._boostChargeFraction);
         }
 
-        __instance._localAcceleration = new Vector3(__instance._translationalInput.x * __instance._maxTranslationalThrust, y, __instance._translationalInput.z * __instance._maxTranslationalThrust);
+        __instance._localAcceleration = new Vector3(__instance._translationalInput.x * __instance._maxTranslationalThrust, thrustY, __instance._translationalInput.z * __instance._maxTranslationalThrust);
         __instance._isTranslationalFiring = (__instance._localAcceleration.magnitude > 0f);
         if (__instance._isTranslationalFiring)
         {

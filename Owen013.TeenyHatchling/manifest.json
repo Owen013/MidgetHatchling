@@ -1,8 +1,8 @@
 {
   "filename": "SmolHatchling.dll",
   "author": "Owen_013",
-  "name": "Smol Hatchling",
+  "name": "Smol Hatchling: Scale Manipulator",
   "uniqueName": "Owen013.TeenyHatchling",
   "version": "2.0.0_d",
-  "owmlVersion": "2.11.1"
+  "owmlVersion": "2.13.0"
 }
