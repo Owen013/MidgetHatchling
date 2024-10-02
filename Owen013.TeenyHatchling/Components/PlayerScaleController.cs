@@ -469,23 +469,11 @@ public class PlayerScaleController : ScaleController
         });
     }
 
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(PlayerAttachPoint), nameof(PlayerAttachPoint.AttachPlayer))]
-    private static void EditAttachOffset(PlayerAttachPoint __instance)
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(ShipCockpitController), nameof(ShipCockpitController.OnPressInteract))]
+    private static void EditShipCockpitAttachPoint(ShipCockpitController __instance)
     {
-        if (__instance.name == "CockpitAttachPoint")
-        {
-            Vector3 defaultAttachPoint = new Vector3(0f, 0.3353f, 4.2307f);
-            __instance.transform.parent.GetComponentInChildren<ShipCockpitController>()._origAttachPointLocalPos = defaultAttachPoint + new Vector3(0, 0.8496f * (1 - Instance.TargetScale), 0.15f * (1 - Instance.TargetScale));
-        }
-        else if (__instance.name == "ModelRocketStation_AttachPoint" || __instance.GetComponentInParent<Elevator>())
-        {
-            __instance._attachOffset.y = -1 + Instance.TargetScale;
-        }
-        else if (__instance.GetComponentInParent<StationaryProbeLauncher>() || __instance.GetComponentInParent<ShipLogController>())
-        {
-            __instance._attachOffset = new Vector3(0, 0.8496f * (1 - Instance.TargetScale), 0.15f * (1 - Instance.TargetScale));
-        }
+        __instance._origAttachPointLocalPos = new Vector3(0, 0.3353f + 0.8496f * (1 - Instance.TargetScale), 4.2307f + 0.15f * (1 - Instance.TargetScale));
     }
 
     [HarmonyPostfix]
@@ -498,10 +486,37 @@ public class PlayerScaleController : ScaleController
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GhostGrabController), nameof(GhostGrabController.OnStartLiftPlayer))]
-    private static void GhostLiftedPlayer(GhostGrabController __instance)
+    private static void EditGhostAttachOffset(GhostGrabController __instance)
     {
-        // Offset attachment so that camera is where it normally is
         __instance._attachPoint._attachOffset = new Vector3(0, 0.8496f * (1 - Instance.Scale), 0.15f * (1 - Instance.Scale));
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(RemoteFlightConsole), nameof(RemoteFlightConsole.OnPressInteract))]
+    private static void EditModelRocketAttachOffset(RemoteFlightConsole __instance)
+    {
+        __instance._attachPoint._attachOffset.y = -1 + Instance.TargetScale;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Elevator), nameof(Elevator.OnPressInteract))]
+    private static void EditElevatorAttachOffset(Elevator __instance)
+    {
+        __instance._attachPoint._attachOffset.y = -1 + Instance.TargetScale;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(ShipLogController), nameof(ShipLogController.OnPressInteract))]
+    private static void EditShipLogAttachOffset(ShipLogController __instance)
+    {
+        __instance._attachPoint._attachOffset = new Vector3(0, 0.8496f * (1 - Instance.TargetScale), 0.15f * (1 - Instance.TargetScale));
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(StationaryProbeLauncher), nameof(StationaryProbeLauncher.OnPressInteract))]
+    private static void EditStationaryProbeLauncherAttachOffset(StationaryProbeLauncher __instance)
+    {
+        __instance._attachPoint._attachOffset = new Vector3(0, 0.8496f * (1 - Instance.TargetScale), 0.15f * (1 - Instance.TargetScale));
     }
 
     [HarmonyPostfix]
