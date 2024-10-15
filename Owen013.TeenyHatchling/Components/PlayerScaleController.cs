@@ -478,6 +478,7 @@ public class PlayerScaleController : ScaleController
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Campfire), nameof(Campfire.StartRoasting))]
+    [HarmonyPatch(typeof(Campfire), nameof(Campfire.StartSleeping))]
     private static void EditCampfireAttachOffset(Campfire __instance)
     {
         __instance._attachPoint._attachOffset *= 0.5f * (1 + Instance.TargetScale);
@@ -564,5 +565,6 @@ public class PlayerScaleController : ScaleController
  *  - Footstep particles stay huge when you shrink back down (may have fixed itself??? be on lookout) (nope...nevermind. rare)
  *  - flashlight distance doesn't scale
  *  - maybe i should reduce wind volume when big?
+ *  - damage movement speed damping may not scale
  *  
  */
