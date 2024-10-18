@@ -51,6 +51,15 @@ public class SmolHatchlingAPI
     }
 
     /// <summary>
+    /// The scale anglerfish will be when they start.
+    /// </summary>
+    /// <param name="scale">The default scale jellyfish should be.</param>
+    public void SetJellyfishDefaultScale(float scale)
+    {
+        JellyfishScaleController.DefaultScale = scale;
+    }
+
+    /// <summary>
     /// The scale inhabitants will be when they start.
     /// </summary>
     /// <param name="scale">The default scale inhabitants should be.</param>
@@ -76,6 +85,10 @@ public class SmolHatchlingAPI
             else if (gameObject.GetComponent<AnglerfishController>())
             {
                 scaleController = gameObject.AddComponent<AnglerfishScaleController>();
+            }
+            else if (gameObject.GetComponent<JellyfishController>())
+            {
+                scaleController = gameObject.AddComponent<JellyfishScaleController>();
             }
             else
             {
@@ -134,10 +147,10 @@ public class SmolHatchlingAPI
         return PlayerScaleController.AnimSpeed;
     }
 
-    [Obsolete("UseScaledPlayerAttributes() is deprecated.")]
+    [Obsolete("As of v2.0.0, the player is always using scaled attributes.")]
     public bool UseScaledPlayerAttributes()
     {
-        ModMain.Print("As of 2.0.0, the player is always using scaled attributes.", OWML.Common.MessageType.Debug);
+        ModMain.Print("As of v2.0.0, the player is always using scaled attributes.", OWML.Common.MessageType.Debug);
         return true;
     }
 }

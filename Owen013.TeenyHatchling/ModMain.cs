@@ -4,7 +4,6 @@ using OWML.ModHelper;
 using SmolHatchling.Components;
 using SmolHatchling.Interfaces;
 using System.Reflection;
-using UnityEngine;
 
 namespace SmolHatchling;
 
@@ -25,6 +24,8 @@ public class ModMain : ModBehaviour
     public static bool UseOtherCustomScales { get; private set; }
 
     public static float CustomAnglerfishScale { get; private set; }
+
+    public static float CustomJellyfishScale { get; private set; }
 
     public static float CustomInhabitantScale { get; private set; }
 
@@ -52,6 +53,7 @@ public class ModMain : ModBehaviour
         UseScaleHotkeys = config.GetSettingsValue<bool>("UseScaleHotkeys");
         UseOtherCustomScales = config.GetSettingsValue<bool>("UseOtherCustomScales");
         CustomAnglerfishScale = config.GetSettingsValue<float>("CustomAnglerfishScale");
+        CustomJellyfishScale = config.GetSettingsValue<float>("CustomJellyfishScale");
         CustomInhabitantScale = config.GetSettingsValue<float>("CustomInhabitantScale");
 
         if (CustomPlayerScale <= 0)
@@ -64,6 +66,12 @@ public class ModMain : ModBehaviour
         {
             Print("Anglerfish Scale cannot be 0 or less.", MessageType.Error);
             SetConfigSetting("CustomAnglerfishScale", 1);
+        }
+
+        if (CustomJellyfishScale <= 0)
+        {
+            Print("Jellyfish Scale cannot be 0 or less.", MessageType.Error);
+            SetConfigSetting("CustomJellyfishScale", 1);
         }
 
         if (CustomInhabitantScale <= 0)
