@@ -35,11 +35,11 @@ public class PlayerScaleController : ScaleController
     {
         base.Awake();
         Instance = this;
-        Config.OnConfigured += () =>
+        ModMain.OnConfigured += () =>
         {
-            if (Config.UseCustomPlayerScale)
+            if (ModMain.UseCustomPlayerScale)
             {
-                EaseToScale(Config.PlayerScale);
+                EaseToScale(ModMain.PlayerScale);
             }
             else
             {
@@ -54,7 +54,7 @@ public class PlayerScaleController : ScaleController
         {
             if (_resetButtonHeldTime >= 5f)
             {
-                Config.SetConfigSetting("UseCustomPlayerScale", false);
+                ModMain.Instance.SetConfigSetting("UseCustomPlayerScale", false);
                 EaseToScale(DefaultScale);
                 _resetButtonHeldTime = 0;
                 ModMain.Print("'Use Custom Player Scale' disabled");
@@ -69,28 +69,28 @@ public class PlayerScaleController : ScaleController
             _resetButtonHeldTime = 0;
         }
 
-        if (OWInput.IsInputMode(InputMode.Character) && Config.UseCustomPlayerScale && Config.UseScaleHotkeys)
+        if (OWInput.IsInputMode(InputMode.Character) && ModMain.UseCustomPlayerScale && ModMain.UseScaleHotkeys)
         {
             if (Keyboard.current[Key.Comma].wasPressedThisFrame)
             {
-                float currentScale = Config.PlayerScale;
+                float currentScale = ModMain.PlayerScale;
                 float newScale = currentScale / 2;
-                Config.SetConfigSetting("PlayerScale", newScale);
+                ModMain.Instance.SetConfigSetting("PlayerScale", newScale);
                 EaseToScale(newScale);
             }
 
             if (Keyboard.current[Key.Period].wasPressedThisFrame)
             {
-                float currentScale = Config.PlayerScale;
+                float currentScale = ModMain.PlayerScale;
                 float newScale = currentScale * 2;
-                Config.SetConfigSetting("PlayerScale", newScale);
+                ModMain.Instance.SetConfigSetting("PlayerScale", newScale);
                 EaseToScale(newScale);
             }
 
             if (Keyboard.current[Key.Slash].wasPressedThisFrame)
             {
                 float newScale = 1;
-                Config.SetConfigSetting("PlayerScale", newScale);
+                ModMain.Instance.SetConfigSetting("PlayerScale", newScale);
                 EaseToScale(newScale);
             }
         }
@@ -98,7 +98,7 @@ public class PlayerScaleController : ScaleController
 
     protected override void FixedUpdate()
     {
-        if (!Config.UseCustomPlayerScale && TargetScale != DefaultScale)
+        if (!ModMain.UseCustomPlayerScale && TargetScale != DefaultScale)
         {
             EaseToScale(DefaultScale);
         }
@@ -113,7 +113,7 @@ public class PlayerScaleController : ScaleController
         if (ModMain.HikersModAPI == null)
         {
             PlayerCharacterController player = GetComponent<PlayerCharacterController>();
-            if (Config.UseScaledPlayerSpeed)
+            if (ModMain.UseScaledPlayerSpeed)
             {
                 player._runSpeed = 6 * Scale;
                 player._strafeSpeed = 4 * Scale;
@@ -386,7 +386,7 @@ public class PlayerScaleController : ScaleController
     [HarmonyPatch(typeof(JetpackThrusterModel), nameof(JetpackThrusterModel.FireTranslationalThrusters))]
     private static bool JetpackThrusterModel_FireTranslationalThrusters(JetpackThrusterModel __instance)
     {
-        if (Config.UseScaledPlayerSpeed == false) return true;
+        if (ModMain.UseScaledPlayerSpeed == false) return true;
 
         float thrustY = __instance._translationalInput.y * __instance._maxTranslationalThrust;
         if (__instance._boostActivated)
@@ -438,7 +438,7 @@ public class PlayerScaleController : ScaleController
     // this prefix is added manually if Hiker's Mod is not installed
     internal static bool DreamLanternItem_OverrideMaxRunSpeed(ref float maxSpeedX, ref float maxSpeedZ, DreamLanternItem __instance)
     {
-        if (!Config.UseScaledPlayerSpeed) return true;
+        if (!ModMain.UseScaledPlayerSpeed) return true;
 
         float lerpPosition = 1f - __instance._lanternController.GetFocus();
         lerpPosition *= lerpPosition;
@@ -455,9 +455,9 @@ public class PlayerScaleController : ScaleController
         // fire on the next update to avoid breaking things
         ModMain.Instance.ModHelper.Events.Unity.FireOnNextUpdate(() =>
         {
-            if (Config.UseCustomPlayerScale)
+            if (ModMain.UseCustomPlayerScale)
             {
-                scaleController.Scale = Config.PlayerScale;
+                scaleController.Scale = ModMain.PlayerScale;
             }
             else
             {
@@ -552,7 +552,7 @@ public class PlayerScaleController : ScaleController
     [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.GetMaxImpactSpeed))]
     private static void GetImpactSpeed(ref float __result)
     {
-        if (Config.UseScaledPlayerDamage)
+        if (ModMain.UseScaledPlayerDamage)
         {
             __result *= Mathf.Max(Instance.Scale, Instance.TargetScale);
         }

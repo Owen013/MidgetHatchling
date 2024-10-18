@@ -33,7 +33,7 @@
     },
     "UseScaledPlayerDamage": {
       "title": "Change Player's Impact Damage to Match Size",
-      "tooltip": "Changes the amount of damage you take from impacts to match your size. Larger = more resilient.",
+      "tooltip": "Changes the amount of damage you take from impacts. Larger = less damage.",
       "type": "toggle",
       "value": true
     }
