@@ -29,6 +29,8 @@ public class ModMain : ModBehaviour
 
     public static float CustomInhabitantScale { get; private set; }
 
+    public static float PlayerWideness { get; private set; }
+
     public delegate void ConfigureEvent();
 
     public static event ConfigureEvent OnConfigured;
@@ -55,6 +57,7 @@ public class ModMain : ModBehaviour
         CustomAnglerfishScale = config.GetSettingsValue<float>("CustomAnglerfishScale");
         CustomJellyfishScale = config.GetSettingsValue<float>("CustomJellyfishScale");
         CustomInhabitantScale = config.GetSettingsValue<float>("CustomInhabitantScale");
+        PlayerWideness = config.GetSettingsValue<float>("PlayerWideness");
 
         if (CustomPlayerScale <= 0)
         {

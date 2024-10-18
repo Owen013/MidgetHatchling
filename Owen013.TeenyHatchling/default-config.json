@@ -53,6 +53,17 @@
       "tooltip": "Changes the size of inhabitants.",
       "type": "number",
       "value": 1
+    },
+
+    "Miscellaneous": {
+      "title": "Miscellaneous",
+      "type": "separator"
+    },
+    "PlayerWideness": {
+      "title": "W I D E N E S S",
+      "tooltip": "A silly feature from Smol Hatchling 1.0 that's being kept for legacy reasons.",
+      "type": "number",
+      "value": 1
     }
   }
 }

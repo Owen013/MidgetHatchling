@@ -13,6 +13,8 @@ public class PlayerScaleController : ScaleController
 
     public static float DefaultScale = 1;
 
+    private Animator _animator;
+
     public override float Scale
     {
         set
@@ -35,6 +37,11 @@ public class PlayerScaleController : ScaleController
     {
         base.Awake();
         Instance = this;
+    }
+
+    private void Start()
+    {
+        _animator = Locator.GetPlayerController().GetComponentInChildren<Animator>();
     }
 
     private void Update()
@@ -112,14 +119,17 @@ public class PlayerScaleController : ScaleController
         AnimSpeed = 1f / Instance.Scale;
         if (ModMain.HikersModAPI == null)
         {
-            AnimSpeed = Mathf.Max(Mathf.Sqrt(Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude * AnimSpeed / 6f), 1f);
+            AnimSpeed = Mathf.Max(Mathf.Sqrt(Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude * AnimSpeed / (6f * ModMain.PlayerWideness)), 1f);
             if (!ModMain.IsImmersionInstalled)
             {
-                Locator.GetPlayerController().GetComponentInChildren<Animator>().speed = AnimSpeed;
+                _animator.speed = AnimSpeed;
             }
         }
 
-        Locator.GetPlayerCamera().nearClipPlane = Mathf.Min(0.1f, 0.1f * Scale);
+        PlayerCameraController cameraController = Locator.GetPlayerCameraController();
+        cameraController.GetCamera().nearClipPlane = Mathf.Min(0.1f, 0.1f * Scale);
+        cameraController._origLocalPosition.z = 0.15f + 0.30f * (ModMain.PlayerWideness - 1);
+        _animator.transform.localScale = 0.1f * (Vector3.up + new Vector3(ModMain.PlayerWideness, 0, ModMain.PlayerWideness));
     }
 
     // PATCHES
@@ -519,8 +529,8 @@ public class PlayerScaleController : ScaleController
         {
             groundVelocity.z = 0f;
         }
-        __instance._animator.SetFloat("RunSpeedX", groundVelocity.x / (3f * Instance.Scale));
-        __instance._animator.SetFloat("RunSpeedY", groundVelocity.z / (3f * Instance.Scale));
+        __instance._animator.SetFloat("RunSpeedX", groundVelocity.x / (3f * Instance.Scale * ModMain.PlayerWideness));
+        __instance._animator.SetFloat("RunSpeedY", groundVelocity.z / (3f * Instance.Scale * ModMain.PlayerWideness));
 
         // scale freefall speed anim
         __instance._animator.SetFloat("FreefallSpeed", __instance._animator.GetFloat("FreefallSpeed") / Instance.Scale);
