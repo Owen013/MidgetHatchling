@@ -16,30 +16,6 @@ public class SmolHatchlingAPI
     }
 
     /// <summary>
-    /// The default scale of the player.
-    /// If set before the first update, the player will be this size when they start.
-    /// If set after, the player will slowly ease to this size.
-    /// </summary>
-    /// <param name="scale">The default scale the player should be.</param>
-    public void SetPlayerDefaultScale(float scale)
-    {
-        PlayerScaleController.DefaultScale = scale;
-    }
-
-    /// <summary>
-    /// Sets the default scale of the player and then instantly snaps it to a given size.
-    /// </summary>
-    /// <param name="scale">The scale you want to snap the player to.</param>
-    public void SetPlayerScaleInstantly(float scale)
-    {
-        PlayerScaleController.DefaultScale = scale;
-        if (PlayerScaleController.Instance != null)
-        {
-            PlayerScaleController.Instance.Scale = scale;
-        }
-    }
-
-    /// <summary>
     /// Returns the final scale that the player is easing towards.
     /// </summary>
     public float GetPlayerTargetScale()
@@ -57,11 +33,30 @@ public class SmolHatchlingAPI
     }
 
     /// <summary>
-    /// Returns true if Smol Hatchling is scaling the player's speed to match their size.
+    /// The scale the player will be when they start.
     /// </summary>
-    public bool UseScaledPlayerSpeed()
+    /// <param name="scale">The default scale the player should be.</param>
+    public void SetPlayerDefaultScale(float scale)
     {
-        return ModMain.UseScaledPlayerSpeed;
+        PlayerScaleController.DefaultScale = scale;
+    }
+
+    /// <summary>
+    /// The scale anglerfish will be when they start.
+    /// </summary>
+    /// <param name="scale">The default scale anglerfish should be.</param>
+    public void SetAnglerfishDefaultScale(float scale)
+    {
+        AnglerfishScaleController.DefaultScale = scale;
+    }
+
+    /// <summary>
+    /// The scale inhabitants will be when they start.
+    /// </summary>
+    /// <param name="scale">The default scale inhabitants should be.</param>
+    public void SetInhabitantDefaultScale(float scale)
+    {
+        GhostScaleController.DefaultScale = scale;
     }
 
     /// <summary>
@@ -88,14 +83,34 @@ public class SmolHatchlingAPI
             }
         }
 
-        if (scaleController is PlayerScaleController)
+        scaleController.Scale = scale;
+    }
+
+    /// <summary>
+    /// Smoothly resizes a GameObject using its ScaleController. If the GameObject does not have a ScaleController, one will be created.
+    /// </summary>
+    /// <param name="gameObject">The GameObject to resize.</param>
+    /// <param name="scale">The size you want the GameObject to be.</param>
+    public void EaseGameObjectScale(GameObject gameObject, float scale)
+    {
+        ScaleController scaleController = gameObject.GetComponent<ScaleController>();
+        if (gameObject.GetComponent<ScaleController>() == null)
         {
-            SetPlayerScaleInstantly(scale);
+            if (gameObject.GetComponent<PlayerCharacterController>())
+            {
+                scaleController = gameObject.AddComponent<PlayerScaleController>();
+            }
+            else if (gameObject.GetComponent<AnglerfishController>())
+            {
+                scaleController = gameObject.AddComponent<AnglerfishScaleController>();
+            }
+            else
+            {
+                scaleController = gameObject.AddComponent<ScaleController>();
+            }
         }
-        else
-        {
-            scaleController.Scale = scale;
-        }
+
+        scaleController.SetTargetScale(scale);
     }
 
     [Obsolete("GetTargetScale() is deprecated. Use GetPlayerScale() instead.")]
@@ -119,10 +134,10 @@ public class SmolHatchlingAPI
         return PlayerScaleController.AnimSpeed;
     }
 
-    [Obsolete("UseScaledPlayerAttributes() is deprecated. Use UseScaledPlayerSpeed() instead.")]
+    [Obsolete("UseScaledPlayerAttributes() is deprecated.")]
     public bool UseScaledPlayerAttributes()
     {
-        ModMain.Print("UseScaledPlayerAttributes() is deprecated. Use UseScaledPlayerSpeed() instead.", OWML.Common.MessageType.Debug);
-        return ModMain.UseScaledPlayerSpeed;
+        ModMain.Print("As of 2.0.0, the player is always using scaled attributes.", OWML.Common.MessageType.Debug);
+        return true;
     }
 }

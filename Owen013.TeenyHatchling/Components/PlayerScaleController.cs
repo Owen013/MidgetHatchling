@@ -18,16 +18,16 @@ public class PlayerScaleController : ScaleController
         set
         {
             transform.localScale = Vector3.one * value;
-            EaseToScale(value);
+            SetTargetScale(value);
             Locator.GetPlayerCamera().nearClipPlane = Mathf.Min(0.1f, 0.1f * Scale);
         }
     }
 
     private float _resetButtonHeldTime;
 
-    public override void EaseToScale(float scale)
+    public override void SetTargetScale(float scale)
     {
-        base.EaseToScale(scale);
+        base.SetTargetScale(scale);
         ModMain.HikersModAPI?.UpdateConfig();
     }
 
@@ -35,17 +35,6 @@ public class PlayerScaleController : ScaleController
     {
         base.Awake();
         Instance = this;
-        ModMain.OnConfigured += () =>
-        {
-            if (ModMain.UseCustomPlayerScale)
-            {
-                EaseToScale(ModMain.PlayerScale);
-            }
-            else
-            {
-                EaseToScale(DefaultScale);
-            }
-        };
     }
 
     private void Update()
@@ -55,7 +44,6 @@ public class PlayerScaleController : ScaleController
             if (_resetButtonHeldTime >= 5f)
             {
                 ModMain.Instance.SetConfigSetting("UseCustomPlayerScale", false);
-                EaseToScale(DefaultScale);
                 _resetButtonHeldTime = 0;
                 ModMain.Print("'Use Custom Player Scale' disabled");
             }
@@ -73,68 +61,49 @@ public class PlayerScaleController : ScaleController
         {
             if (Keyboard.current[Key.Comma].wasPressedThisFrame)
             {
-                float currentScale = ModMain.PlayerScale;
+                float currentScale = ModMain.CustomPlayerScale;
                 float newScale = currentScale / 2;
-                ModMain.Instance.SetConfigSetting("PlayerScale", newScale);
-                EaseToScale(newScale);
+                ModMain.Instance.SetConfigSetting("CustomPlayerScale", newScale);
+                SetTargetScale(newScale);
             }
 
             if (Keyboard.current[Key.Period].wasPressedThisFrame)
             {
-                float currentScale = ModMain.PlayerScale;
+                float currentScale = ModMain.CustomPlayerScale;
                 float newScale = currentScale * 2;
-                ModMain.Instance.SetConfigSetting("PlayerScale", newScale);
-                EaseToScale(newScale);
+                ModMain.Instance.SetConfigSetting("CustomPlayerScale", newScale);
+                SetTargetScale(newScale);
             }
 
             if (Keyboard.current[Key.Slash].wasPressedThisFrame)
             {
                 float newScale = 1;
-                ModMain.Instance.SetConfigSetting("PlayerScale", newScale);
-                EaseToScale(newScale);
+                ModMain.Instance.SetConfigSetting("CustomPlayerScale", newScale);
+                SetTargetScale(newScale);
             }
         }
     }
 
     protected override void FixedUpdate()
     {
-        if (!ModMain.UseCustomPlayerScale && TargetScale != DefaultScale)
+        if (ModMain.UseCustomPlayerScale && TargetScale != ModMain.CustomPlayerScale)
         {
-            EaseToScale(DefaultScale);
+            SetTargetScale(ModMain.CustomPlayerScale);
         }
 
         base.FixedUpdate();
 
-        if (Scale != TargetScale)
-        {
-            Locator.GetPlayerCamera().nearClipPlane = Mathf.Min(0.1f, 0.1f * Scale);
-        }
-
         if (ModMain.HikersModAPI == null)
         {
             PlayerCharacterController player = GetComponent<PlayerCharacterController>();
-            if (ModMain.UseScaledPlayerSpeed)
-            {
-                player._runSpeed = 6 * Scale;
-                player._strafeSpeed = 4 * Scale;
-                player._walkSpeed = 3 * Scale;
-                player._airSpeed = 3 * Scale;
-                player._acceleration = 0.5f * Scale;
-                player._airAcceleration = 0.09f * Scale;
-                player._minJumpSpeed = 3 * Scale;
-                player._maxJumpSpeed = 7 * Scale;
-            }
-            else
-            {
-                player._runSpeed = 6;
-                player._strafeSpeed = 4;
-                player._walkSpeed = 3;
-                player._airSpeed = 3;
-                player._acceleration = 0.5f;
-                player._airAcceleration = 0.09f;
-                player._minJumpSpeed = 3;
-                player._maxJumpSpeed = 7;
-            }
+            player._runSpeed = 6 * Scale;
+            player._strafeSpeed = 4 * Scale;
+            player._walkSpeed = 3 * Scale;
+            player._airSpeed = 3 * Scale;
+            player._acceleration = 0.5f * Scale;
+            player._airAcceleration = 0.09f * Scale;
+            player._minJumpSpeed = 3 * Scale;
+            player._maxJumpSpeed = 7 * Scale;
         }
     }
 
@@ -149,6 +118,8 @@ public class PlayerScaleController : ScaleController
                 Locator.GetPlayerController().GetComponentInChildren<Animator>().speed = AnimSpeed;
             }
         }
+
+        Locator.GetPlayerCamera().nearClipPlane = Mathf.Min(0.1f, 0.1f * Scale);
     }
 
     // PATCHES
@@ -383,10 +354,18 @@ public class PlayerScaleController : ScaleController
     }
 
     [HarmonyPrefix]
+    [HarmonyPatch(typeof(PlayerAttachPoint), nameof(PlayerAttachPoint.AttachPlayer))]
+    [HarmonyPatch(typeof(PlayerAttachPoint), nameof(PlayerAttachPoint.DetachPlayer))]
+    private static void FinishResizingInstantly()
+    {
+        Instance.Scale = Instance.TargetScale;
+    }
+
+    [HarmonyPrefix]
     [HarmonyPatch(typeof(JetpackThrusterModel), nameof(JetpackThrusterModel.FireTranslationalThrusters))]
     private static bool JetpackThrusterModel_FireTranslationalThrusters(JetpackThrusterModel __instance)
     {
-        if (ModMain.UseScaledPlayerSpeed == false) return true;
+        if (Instance.Scale == 1) return true;
 
         float thrustY = __instance._translationalInput.y * __instance._maxTranslationalThrust;
         if (__instance._boostActivated)
@@ -438,7 +417,7 @@ public class PlayerScaleController : ScaleController
     // this prefix is added manually if Hiker's Mod is not installed
     internal static bool DreamLanternItem_OverrideMaxRunSpeed(ref float maxSpeedX, ref float maxSpeedZ, DreamLanternItem __instance)
     {
-        if (!ModMain.UseScaledPlayerSpeed) return true;
+        if (Instance.Scale == 1) return true;
 
         float lerpPosition = 1f - __instance._lanternController.GetFocus();
         lerpPosition *= lerpPosition;
@@ -457,14 +436,14 @@ public class PlayerScaleController : ScaleController
         {
             if (ModMain.UseCustomPlayerScale)
             {
-                scaleController.Scale = ModMain.PlayerScale;
+                scaleController.Scale = ModMain.CustomPlayerScale;
             }
             else
             {
                 scaleController.Scale = DefaultScale;
             }
 
-            __instance.transform.position += __instance.GetLocalUpDirection() * (-1 + Instance.Scale);
+            __instance.transform.position += __instance.GetLocalUpDirection() * (-1 + scaleController.Scale);
             ModMain.HikersModAPI?.UpdateConfig();
         });
     }
@@ -552,7 +531,7 @@ public class PlayerScaleController : ScaleController
     [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.GetMaxImpactSpeed))]
     private static void GetImpactSpeed(ref float __result)
     {
-        if (ModMain.UseScaledPlayerDamage)
+        if (Instance.Scale != 1)
         {
             __result *= Mathf.Max(Instance.Scale, Instance.TargetScale);
         }

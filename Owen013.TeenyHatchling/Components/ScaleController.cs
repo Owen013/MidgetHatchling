@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Newtonsoft.Json.Linq;
+using UnityEngine;
 
 namespace SmolHatchling.Components;
 
@@ -14,13 +15,13 @@ public class ScaleController : MonoBehaviour
         set
         {
             transform.localScale = Vector3.one * value;
-            TargetScale = value;
+            SetTargetScale(value);
         }
     }
 
-    public float TargetScale { get; protected set; }
+    public float TargetScale { get; private set; }
 
-    public virtual void EaseToScale(float scale)
+    public virtual void SetTargetScale(float scale)
     {
         TargetScale = scale;
     }

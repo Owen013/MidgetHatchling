@@ -4,6 +4,7 @@ using OWML.ModHelper;
 using SmolHatchling.Components;
 using SmolHatchling.Interfaces;
 using System.Reflection;
+using UnityEngine;
 
 namespace SmolHatchling;
 
@@ -17,13 +18,15 @@ public class ModMain : ModBehaviour
 
     public static bool UseCustomPlayerScale { get; private set; }
 
-    public static float PlayerScale { get; private set; }
+    public static float CustomPlayerScale { get; private set; }
 
     public static bool UseScaleHotkeys { get; private set; }
 
-    public static bool UseScaledPlayerSpeed { get; private set; }
+    public static bool UseOtherCustomScales { get; private set; }
 
-    public static bool UseScaledPlayerDamage { get; private set; }
+    public static float CustomAnglerfishScale { get; private set; }
+
+    public static float CustomInhabitantScale { get; private set; }
 
     public delegate void ConfigureEvent();
 
@@ -45,10 +48,29 @@ public class ModMain : ModBehaviour
         base.Configure(config);
 
         UseCustomPlayerScale = config.GetSettingsValue<bool>("UseCustomPlayerScale");
-        PlayerScale = config.GetSettingsValue<float>("PlayerScale");
+        CustomPlayerScale = config.GetSettingsValue<float>("CustomPlayerScale");
         UseScaleHotkeys = config.GetSettingsValue<bool>("UseScaleHotkeys");
-        UseScaledPlayerSpeed = config.GetSettingsValue<bool>("UseScaledPlayerSpeed");
-        UseScaledPlayerDamage = config.GetSettingsValue<bool>("UseScaledPlayerDamage");
+        UseOtherCustomScales = config.GetSettingsValue<bool>("UseOtherCustomScales");
+        CustomAnglerfishScale = config.GetSettingsValue<float>("CustomAnglerfishScale");
+        CustomInhabitantScale = config.GetSettingsValue<float>("CustomInhabitantScale");
+
+        if (CustomPlayerScale <= 0)
+        {
+            Print("Player Scale cannot be 0 or less.", MessageType.Error);
+            SetConfigSetting("CustomPlayerScale", 1);
+        }
+
+        if (CustomAnglerfishScale <= 0)
+        {
+            Print("Anglerfish Scale cannot be 0 or less.", MessageType.Error);
+            SetConfigSetting("CustomAnglerfishScale", 1);
+        }
+
+        if (CustomInhabitantScale <= 0)
+        {
+            Print("Inhabitant Scale cannot be 0 or less.", MessageType.Error);
+            SetConfigSetting("CustomInhabitantScale", 1);
+        }
 
         OnConfigured?.Invoke();
     }

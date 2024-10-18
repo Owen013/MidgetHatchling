@@ -1,12 +1,23 @@
 ﻿using HarmonyLib;
-using SmolHatchling.Components;
 using UnityEngine;
 
-namespace SmolHatchling;
+namespace SmolHatchling.Components;
 
 [HarmonyPatch]
-public static class GhostSpeedHandler
+public class GhostScaleController : ScaleController
 {
+    public static float DefaultScale = 1;
+
+    protected override void FixedUpdate()
+    {
+        if (ModMain.UseOtherCustomScales && TargetScale != ModMain.CustomInhabitantScale)
+        {
+            SetTargetScale(ModMain.CustomInhabitantScale);
+        }
+
+        base.FixedUpdate();
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(GhostController), nameof(GhostController.UpdatePositionFromVelocity))]
     private static bool GhostController_MoveToLocalPosition(GhostController __instance)
@@ -30,5 +41,26 @@ public static class GhostSpeedHandler
         __instance.transform.localPosition = vector;
 
         return false;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(GhostBrain), nameof(GhostBrain.Start))]
+    private static void AddScaleControllerToGhost(GhostBrain __instance)
+    {
+        ScaleController scaleController = __instance.gameObject.AddComponent<GhostScaleController>();
+        // fire on the next update to avoid breaking things
+        ModMain.Instance.ModHelper.Events.Unity.FireOnNextUpdate(() =>
+        {
+            if (ModMain.UseOtherCustomScales)
+            {
+                scaleController.Scale = ModMain.CustomInhabitantScale;
+            }
+            else
+            {
+                scaleController.Scale = DefaultScale;
+            }
+
+            __instance.transform.position += __instance.transform.up * (-1 + scaleController.Scale);
+        });
     }
 }

@@ -37,7 +37,7 @@ public interface ISmolHatchling
     /// <summary>
     /// Returns true if Smol Hatchling is scaling the player's speed to match their size.
     /// </summary>
-    public bool UseScaledPlayerSpeed();
+    public bool IsUsingScaledPlayerSpeed();
 
     /// <summary>
     /// Resizes a GameObject using its ScaleController. If the GameObject does not have a ScaleController, one will be created.

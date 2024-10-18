@@ -9,11 +9,11 @@
     },
     "UseCustomPlayerScale": {
       "title": "Use Custom Player Scale",
-      "tooltip": "Overrides the player scale to the value below. If you get softlocked because of the player's size, hold '/' for 5 seconds to disable.",
+      "tooltip": "Overrides the player scale to the value below. Disabling this will not reset the player's size. If you get softlocked because of the player's size, hold '/' for 5 seconds to disable and then reset the loop.",
       "type": "toggle",
       "value": false
     },
-    "PlayerScale": {
+    "CustomPlayerScale": {
       "title": "Player Scale Multiplier",
       "tooltip": "Changes the size of the player.",
       "type": "number",
@@ -25,18 +25,28 @@
       "type": "toggle",
       "value": true
     },
-    "UseScaledPlayerSpeed": {
-      "title": "Change Player Speed to Match Size",
-      "tooltip": "Changes the speed, jump height, and acceleration of the player to match its size.",
-      "type": "toggle",
-      "value": true
-    },
-    "UseScaledPlayerDamage": {
-      "title": "Change Player's Impact Damage to Match Size",
-      "tooltip": "Changes the amount of damage you take from impacts. Larger = less damage.",
-      "type": "toggle",
-      "value": true
-    }
 
+    "Other Objects": {
+      "title": "Other Objects",
+      "type": "separator"
+    },
+    "UseOtherCustomScales": {
+      "title": "Use Other Custom Scales",
+      "tooltip": "Allows you to override the scale of the below types of objects. Disabling this does not reset objects that have already been resized.",
+      "type": "toggle",
+      "value": false
+    },
+    "CustomAnglerfishScale": {
+      "title": "Anglerfish Scale Multiplier",
+      "tooltip": "Changes the size of anglerfish.",
+      "type": "number",
+      "value": 1
+    },
+    "CustomInhabitantScale": {
+      "title": "Inhabitant Scale Multiplier",
+      "tooltip": "Changes the size of inhabitants.",
+      "type": "number",
+      "value": 1
+    }
   }
 }
