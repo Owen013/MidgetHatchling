@@ -1,19 +1,18 @@
 # Smol Hatchling: Outer Wilds Scale Manipulator
 
-Smol Hatchling is a scale manipulation tool that allows other mods to easily change the size of any object in Outer Wilds!
+Smol Hatchling is a scale manipulation tool that allows other mods to easily change the size of any object in Outer Wilds, while adjusting the properties of those objects to ensure they continue to work properly when resized!
 
-Smol Hatchling will automatically make adjustments to the behavior of resized objects to make sure they don't malfunction and that their features match the different sizes.
-
-![smolhatchling](https://github.com/user-attachments/assets/4f0c6dfd-245b-48a3-bca9-2b95e9c1f3c7)
+![smolhatchling](https://github.com/user-attachments/assets/a950a75e-28d6-47b2-970f-15853af31882)
 
 ## Features
+### Customizable Scale for the Player, Anglerfish, Jellyfish, and more!
+With Smol Hatchling, you can set the player character to any size you want; smaller than a marshmallow, bigger than the solar system, or anywhere in between!
 
-### Resize the Player Character
+It even comes with hotkeys you can use to change your scale on the fly: press the "<" key to divide your size by two, ">" to multiply it by two, and "/" to return to normal. Player properties such as their collider size, grounded raycasts, and speed are automatically tweaked to work with the Player being resized.
 
-Smol Hatchling allows other mods to seamlessly resize the player character! The speed and damage resistence of the player, position of attachment points such as the ship's pilot seat, and more will be automatically adjusted to accomodate the character's size.
+Smol Hatchling can be used to resize **any object** in the game. All moving creatures will have their movement speed and other attributes adjusted as well so it makes sense compared to their size! I'm planning to add adjustments for other types of objects in the future so that they will also be fully functional at different sizes!
 
-The player's size can also be set to a custom value by the user in the config menu.
+Note: Custom Player Scale must be enabled in the config menu prior to use. Otherwise, Smol Hatchling will automatically use the default player scale or the scale set by other mods.
 
-### Resize Anything
-
-Technically, any object in Outer Wilds can be resized using Smol Hatchling. While some things may not behave exactly as expected when changed to a different size, I can always add support for more objects in the future. If you notice anything that doesn't quite work right when resized, open an issue and I'll look into it!
+### API for use by other Mods
+Smol Hatchling comes with an API that other mods can use to resize the Player or other objects!
