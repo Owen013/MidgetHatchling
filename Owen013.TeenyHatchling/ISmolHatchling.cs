@@ -49,7 +49,7 @@ public interface ISmolHatchling
     /// </summary>
     /// <param name="gameObject">The GameObject to resize.</param>
     /// <param name="scale">The size you want the GameObject to be.</param>
-    public void SetGameObjectScale(GameObject gameObject, float scale);
+    public void SetGameObjectToScale(GameObject gameObject, float scale);
 
     /// <summary>
     /// Smoothly resizes a GameObject using its ScaleController. If the GameObject does not have a ScaleController, one will be created.

@@ -104,7 +104,7 @@ public class SmolHatchlingAPI
     /// </summary>
     /// <param name="gameObject">The GameObject to resize.</param>
     /// <param name="scale">The size you want the GameObject to be.</param>
-    public void EaseGameObjectScale(GameObject gameObject, float scale)
+    public void EaseGameObjectToScale(GameObject gameObject, float scale)
     {
         ScaleController scaleController = gameObject.GetComponent<ScaleController>();
         if (gameObject.GetComponent<ScaleController>() == null)
@@ -116,6 +116,10 @@ public class SmolHatchlingAPI
             else if (gameObject.GetComponent<AnglerfishController>())
             {
                 scaleController = gameObject.AddComponent<AnglerfishScaleController>();
+            }
+            else if (gameObject.GetComponent<JellyfishController>())
+            {
+                scaleController = gameObject.AddComponent<JellyfishScaleController>();
             }
             else
             {
