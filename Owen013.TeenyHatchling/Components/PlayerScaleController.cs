@@ -546,6 +546,16 @@ public class PlayerScaleController : ScaleController
             __result *= Mathf.Max(Instance.Scale, Instance.TargetScale);
         }
     }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(MarshmallowCollider), nameof(MarshmallowCollider.Awake))]
+    private static void ResizeMarshmallow(Marshmallow __instance)
+    {
+        if (Instance.Scale != 1)
+        {
+            __instance.transform.localScale *= Instance.Scale;
+        }
+    }
 }
 
 /*      
