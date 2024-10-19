@@ -5,7 +5,8 @@ Smol Hatchling is a scale manipulation tool that allows other mods to easily cha
 ![smolhatchling](https://github.com/user-attachments/assets/a950a75e-28d6-47b2-970f-15853af31882)
 
 ## Features
-### Customizable Scale for the Player, Anglerfish, Jellyfish, and more!
+
+### Customizable Scale for the Player, Anglerfish, the Stranger's Inhabitants, and more!
 With Smol Hatchling, you can set the player character to any size you want; smaller than a marshmallow, bigger than the solar system, or anywhere in between!
 
 It even comes with hotkeys you can use to change your scale on the fly: press the "<" key to divide your size by two, ">" to multiply it by two, and "/" to return to normal. Player properties such as their collider size, grounded raycasts, and speed are automatically tweaked to work with the Player being resized.
